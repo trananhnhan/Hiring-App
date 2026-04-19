@@ -81,15 +81,30 @@ WSGI_APPLICATION = 'core.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
+import cloudinary.api
+
+cloudinary.config(
+    cloud_name="dddesdoxw",
+    api_key="129923682219811",
+    api_secret="0XdRPg9znPv9cqT-y_lfBddmD-Q"
+)
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'hiring_db',
+        'USER': 'root',
+        'PASSWORD': 'root',
+        'HOST': ''  # mặc định localhost
     }
 }
 
+import pymysql
 
+pymysql.version_info = (2, 2, 1, 'final', 0)
+pymysql.install_as_MySQLdb()
+
+AUTH_USER_MODEL = 'accounts.User'
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
 
