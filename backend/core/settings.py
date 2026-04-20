@@ -9,13 +9,14 @@ https://docs.djangoproject.com/en/6.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
-
+import os.path
 from pathlib import Path
-
+import environ
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
+env = environ.Env()
+environ.Env.read_env(BASE_DIR / '.env')
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
@@ -47,6 +48,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'oauth2_provider',
+    'drf_yasg',
 ]
 
 MIDDLEWARE = [
@@ -84,9 +86,9 @@ WSGI_APPLICATION = 'core.wsgi.application'
 import cloudinary.api
 
 cloudinary.config(
-    cloud_name="dddesdoxw",
-    api_key="129923682219811",
-    api_secret="0XdRPg9znPv9cqT-y_lfBddmD-Q"
+    cloud_name=env('CLOUDINARY_CLOUD_NAME'),
+    api_key=env('CLOUDINARY_API_KEY'),
+    api_secret=env('CLOUDINARY_API_SECRET')
 )
 
 DATABASES = {
