@@ -4,7 +4,7 @@ from accounts.models import User
 from accounts.serializers import UserSerializer
 
 
-class UserViewSet(viewsets.ViewSet,generics.CreateAPIView):
+class SignUpViewSet(generics.CreateAPIView):
     queryset = User.objects.filter(is_active = True)
     serializer_class = UserSerializer
 
