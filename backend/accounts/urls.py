@@ -1,12 +1,13 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
-from .views import SignUpViewSet
+from accounts import views
 
 router = DefaultRouter()
-
+router.register('',views.CurrentUserViewSet,basename='current-user')
 
 
 urlpatterns = [
-    path('sign-up',SignUpViewSet.as_view()),
+    path('sign-up',views.SignUpView.as_view()),
+    path('',include(router.urls))
 ]

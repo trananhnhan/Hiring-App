@@ -12,6 +12,7 @@ class UserRole(models.TextChoices):
     CANDIDATE = 'CANDIDATE', 'Candidate'
     MODERATOR = 'MODERATOR', 'Moderator'
     SUPER_USER = 'SUPER_USER', 'Super User'
+
 class SimpleUserNameValidator(UnicodeUsernameValidator):
     regex = r"^[\w-]+\Z"
     message = _(
@@ -46,7 +47,7 @@ class User(AbstractUser):
             self.is_staff = True
             self.is_superuser = True
 
-        self.full_clean()
+        self.clean()
 
         super().save(*args,**kwargs)
 
@@ -82,7 +83,7 @@ class EmployerProfile(models.Model):
 
 
     def save(self,*args,**kwargs):
-        self.full_clean()
+        self.clean()
         super().save(*args,**kwargs)
 
     def __str__(self):
@@ -121,12 +122,12 @@ class CompanyAddress(BaseModel):
             raise ValidationError('An employer cannot have more than 20 addresses.')
 
     def save(self,*args,**kwargs):
-        self.full_clean()
+        self.clean()
         super().save(*args,**kwargs)
 
 class CompanyVerificationImage(BaseModel):
     employer = models.ForeignKey(EmployerProfile, on_delete=models.CASCADE, related_name='verification_images')
-    image = CloudinaryField('verification_image') # Upload ảnh xác thực lên Cloudinary
+    image = CloudinaryField('verification_image')
 
     def clean(self):
         super().clean()
@@ -134,8 +135,8 @@ class CompanyVerificationImage(BaseModel):
             raise ValidationError("An employer cannot have more than 10 verification images.")
 
     def save(self,*args,**kwargs):
-        self.full_clean()
+        self.clean()
         super().save(*args,**kwargs)
 
     def __str__(self):
-        return self.employer.company_name
+        return self.employer.user.username
