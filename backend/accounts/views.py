@@ -17,7 +17,7 @@ class SignUpView(generics.CreateAPIView):
     permission_classes = [AllowAny]
 
 class CurrentUserViewSet(viewsets.ViewSet):
-    permission_classes = [perms.IsBasicUser]
+    permission_classes = [permissions.IsAuthenticated]
 
     @action(detail=False, methods=["get", "patch"],url_path="current-user")
     def current_user(self,request):

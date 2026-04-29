@@ -9,7 +9,9 @@ class SimpleUserSerializer(serializers.ModelSerializer):
         fields = ['id', 'first_name', 'last_name','name', 'role', 'avatar','username', 'email']
         extra_kwargs = {
             'first_name': {'write_only': True},
-            'last_name': {'write_only': True}
+            'last_name': {'write_only': True},
+            'username' : {'read_only' : True},
+            'role' : {'read_only' : True}
         }
 
     def get_name(self,obj):
@@ -82,8 +84,9 @@ class CurrentUserSerializer(SimpleUserSerializer):
         fields = SimpleUserSerializer.Meta.fields + ['profile']
         extra_kwargs = {
             'role' : {'read_only' : True},
-            'profile' : {'read_only' : True},
-
+            'first_name': {'write_only': True},
+            'last_name': {'write_only': True},
+            'username': {'read_only': True},
         }
     def get_profile(self, obj):
         if obj.role == UserRole.EMPLOYER:
