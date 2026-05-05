@@ -5,6 +5,6 @@ export const endpoints = {
         refreshToken : '/o/token/',
     },
     users : {
-        currentUser : '/current-user/',
+        currentUser : 'users/current-user/',
     }
 }

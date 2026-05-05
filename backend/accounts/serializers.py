@@ -1,6 +1,56 @@
 from rest_framework import serializers
-from .models import User, UserRole, CompanyAddress, EmployerProfile, CandidateProfile,CompanyVerificationImage
+from .models import User, UserRole, CompanyAddress, EmployerProfile, CandidateProfile,CompanyVerificationImage,District,Province,Ward
 
+class ProvinceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Province
+        fields = ['id','name']
+
+class DistrictSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = District
+        fields = ['id','name']
+class WardSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Ward
+        fields = ['id','name']
+class CompanyAddressSerializer(serializers.ModelSerializer):
+    district = DistrictSerializer(read_only=True)
+    province = ProvinceSerializer(read_only=True)
+    ward = WardSerializer(read_only=True)
+    ward_id = serializers.PrimaryKeyRelatedField(
+        queryset=Ward.objects.all(),
+        source='ward',
+        write_only=True
+    )
+    class Meta:
+        model = CompanyAddress
+        fields = ['id', 'full_address', 'latitude', 'longitude','ward_id' ,'ward','district','province']
+
+
+class CompanyVerificationImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CompanyVerificationImage
+        fields = ['id', 'image']
+
+class MiniUserSerializer(serializers.ModelSerializer):
+    name = serializers.SerializerMethodField()
+    class Meta:
+        model = User
+        fields = ['name', 'avatar', 'username']
+        extra_kwargs = {
+            'username' : {'read_only' : True},
+            'role' : {'read_only' : True}
+        }
+
+    def get_name(self,obj):
+        return f"{obj.last_name} {obj.first_name}".strip()
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        if instance.avatar:
+            data['avatar'] = instance.avatar.url
+        return data
 
 class SimpleUserSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField()
@@ -44,28 +94,24 @@ class UserSerializer(SimpleUserSerializer):
         user.save()
         return user
 
-class CompanyAddressSerializer(serializers.ModelSerializer):
+class MiniEmployerSerializer(serializers.ModelSerializer):
     class Meta:
-        model = CompanyAddress
-        fields = ['id','full_address','latitude','longitude','ward']
+        model = EmployerProfile
+        fields = ['company_name','company_description']
 
-class CompanyVerificationImageSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CompanyVerificationImage
-        fields = ['id','image']
 
 class SimpleEmployerSerializer(serializers.ModelSerializer):
     addresses = CompanyAddressSerializer(many=True,read_only=True)
     class Meta:
         model = EmployerProfile
-        fields = ['id','company_name','company_description','is_verified']
+        fields = ['id','company_name','company_description','is_verified','addresses']
 
 class EmployerSerializer(SimpleEmployerSerializer):
 
     verification_images = CompanyVerificationImageSerializer(many=True, read_only=True)
     class Meta:
         model = SimpleEmployerSerializer.Meta.model
-        fields = SimpleEmployerSerializer.Meta.fields + ['tax_code','addresses','verification_images',]
+        fields = SimpleEmployerSerializer.Meta.fields + ['tax_code','verification_images',]
 
 class SimpleCandidateSerializer(serializers.ModelSerializer):
     class Meta:

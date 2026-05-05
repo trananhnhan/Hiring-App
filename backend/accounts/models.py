@@ -75,11 +75,11 @@ class EmployerProfile(models.Model):
             origin = EmployerProfile.objects.get(pk = self.pk)
             if not origin.is_verified:
                 if not self.tax_code or not self.company_name:
-                    raise ValidationError("Employer must have a company name and tax_code")
+                    raise ValidationError({"null field":"Employer must have a company name and tax_code"})
                 if self.addresses.count() < 1:
-                    raise ValidationError("Employer must have at least 1 address to be verified.")
+                    raise ValidationError({"company_address":"Employer must have at least 1 address to be verified."})
                 if self.verification_images.count() < 3:
-                    raise ValidationError("Employer must have at least 3 verification images to be verified.")
+                    raise ValidationError({"verification_image":"Employer must have at least 3 verification images to be verified."})
 
 
     def save(self,*args,**kwargs):

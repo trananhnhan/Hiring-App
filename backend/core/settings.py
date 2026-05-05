@@ -27,7 +27,8 @@ SECRET_KEY = 'django-insecure-zy=1^3!bh62#%^xb&it_2a@@di&g5m5bek%%0+@we&06rc@t)8
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    '192.168.1.230'
+    '192.168.1.230',
+    '127.0.0.1'
 ]
 
 
@@ -51,6 +52,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'oauth2_provider',
     'drf_yasg',
+    'django_filters',
 ]
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
