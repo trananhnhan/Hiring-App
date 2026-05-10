@@ -81,11 +81,6 @@ class EmployerProfile(models.Model):
                 if self.verification_images.count() < 3:
                     raise ValidationError({"verification_image":"Employer must have at least 3 verification images to be verified."})
 
-
-    def save(self,*args,**kwargs):
-        self.clean()
-        super().save(*args,**kwargs)
-
     def __str__(self):
         return self.user.username
 
@@ -116,14 +111,6 @@ class CompanyAddress(BaseModel):
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
 
-    def clean(self):
-        super().clean()
-        if not self.pk and self.employer.addresses.count() >= 20:
-            raise ValidationError('An employer cannot have more than 20 addresses.')
-
-    def save(self,*args,**kwargs):
-        self.clean()
-        super().save(*args,**kwargs)
 
 class CompanyVerificationImage(BaseModel):
     employer = models.ForeignKey(EmployerProfile, on_delete=models.CASCADE, related_name='verification_images')
@@ -134,9 +121,6 @@ class CompanyVerificationImage(BaseModel):
         if not self.pk and self.employer.verification_images.count() >= 10:
             raise ValidationError("An employer cannot have more than 10 verification images.")
 
-    def save(self,*args,**kwargs):
-        self.clean()
-        super().save(*args,**kwargs)
 
     def __str__(self):
         return self.employer.user.username

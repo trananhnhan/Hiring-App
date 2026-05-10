@@ -113,6 +113,8 @@ class EmployerSerializer(SimpleEmployerSerializer):
         model = SimpleEmployerSerializer.Meta.model
         fields = SimpleEmployerSerializer.Meta.fields + ['tax_code','verification_images',]
 
+
+
 class SimpleCandidateSerializer(serializers.ModelSerializer):
     class Meta:
         model = CandidateProfile

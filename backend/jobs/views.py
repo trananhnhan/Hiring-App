@@ -1,9 +1,11 @@
 from django.db.models.aggregates import Count
+from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets,filters,generics,mixins
 
-from accounts.perms import IsBasicUser, IsEmployer
-from jobs.filters import JobPostListFilter,JobPostOwnerFilter
+from accounts.perms import IsBasicUser, IsEmployer, IsVerifiedEmployer
+from jobs.perms import IsJobPostOwner
+from jobs.filters import JobPostListFilter
 from core.paginators import JobPostPaginator
 from jobs.models import JobPost, JobPostStatus
 from jobs.serializers import JobPostListSerializer, JobPostDetailSerializer
@@ -36,15 +38,10 @@ class JobPostViewSet(viewsets.ModelViewSet):
         # )
         )
         if self.action == 'list':
-            qs = qs.filter(status = JobPostStatus.OPEN).all()
+            qs = qs.filter(status = JobPostStatus.OPEN).filter(expiry_date__gt=timezone.now()).all()
         else:
             qs = qs.select_related('employer__user')
         return qs
-
-    def get_filter_class(self):
-        if self.action != 'list':
-            return JobPostOwnerFilter
-        return JobPostListFilter
 
     def get_serializer_class(self):
         if self.action == 'list':
@@ -55,6 +52,8 @@ class JobPostViewSet(viewsets.ModelViewSet):
         serializer.save(employer = self.request.user.employer_profile)
 
     def get_permissions(self):
-        if self.action in ['create', 'partial_update', 'destroy']:
-            return [IsEmployer]
-        return [IsBasicUser]
+        if self.action in ['create']:
+            return [IsVerifiedEmployer()]
+        elif self.action in ['update','partial_update','destroy']:
+            return [IsJobPostOwner(),IsVerifiedEmployer()]
+        return [IsBasicUser()]

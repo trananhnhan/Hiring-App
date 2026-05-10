@@ -26,6 +26,11 @@ class CareerFieldSerializer(serializers.ModelSerializer):
         model = CareerField
         fields = ['id', 'field_name']
 
+class SimpleJobPostSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = JobPost
+        fields = ['title','job_thumbnail']
+
 class JobPostListSerializer(serializers.ModelSerializer):
     career_fields = CareerFieldSerializer(read_only=True,many=True)
     address = CompanyAddressSerializer(read_only=True)
@@ -35,11 +40,18 @@ class JobPostListSerializer(serializers.ModelSerializer):
         model = JobPost
         fields = ['id','uuid','career_fields','address',
                   'title','job_thumbnail','salary_min',
-                  'salary_max','slot','expiry_date','employer']
+                  'salary_max','slot','expiry_date','employer','status','application_count']
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        if instance.job_thumbnail:
+            data['job_thumbnail'] = instance.job_thumbnail.url
+        return data
+
 
 class JobPostDetailSerializer(JobPostListSerializer):
-    user = SimpleUserSerializer(read_only=True)
-    work_days = WorkDaySerializer(read_only=True,many=True)
+    user = SimpleUserSerializer(source='employer.user',read_only=True)
+    work_days = WorkDaySerializer(many=True)
     career_fields_id = serializers.PrimaryKeyRelatedField(
         queryset= CareerField.objects.all(),
         source= 'career_fields',
@@ -53,7 +65,7 @@ class JobPostDetailSerializer(JobPostListSerializer):
     )
     class Meta:
         model = JobPostListSerializer.Meta.model
-        fields = JobPostListSerializer.Meta.fields + ['description','user','career_fields_id','work_days']
+        fields = JobPostListSerializer.Meta.fields + ['description','user','career_fields_id','address_id','work_days']
 
     def validate(self, attrs):
         salary_min = attrs.get('salary_min')
@@ -68,10 +80,12 @@ class JobPostDetailSerializer(JobPostListSerializer):
             raise serializers.ValidationError({"expiry_date": "Expiry date must be in the future for OPEN status."})
 
         address = attrs.get('address')
-        employer = attrs.get('employer')
-        if address and employer:
-            if address.employer_id != employer.id:
-                raise serializers.ValidationError({'address': 'Address does not belong to this employer.'})
+        request = self.context.get('request')
+        if request and hasattr(request.user, 'employer_profile'):
+            employer = request.user.employer_profile
+            if address and employer:
+                if address.employer_id != employer.id:
+                    raise serializers.ValidationError({'address': 'Address does not belong to this employer.'})
 
         return attrs
 
@@ -85,3 +99,18 @@ class JobPostDetailSerializer(JobPostListSerializer):
             WorkDay.objects.create(job_post = job_post,**work_day)
 
         job_post.career_fields.set(career_fields_data)
+
+    def update(self, instance, validated_data):
+        career_fields_data = validated_data.pop('career_fields', None)
+
+        if career_fields_data is not None:
+            instance.career_fields.set(career_fields_data)
+
+        work_days_data = validated_data.pop('work_days', None)
+        if work_days_data is not None:
+            instance.work_days.all().delete()
+            for work_day in work_days_data:
+                WorkDay.objects.create(job_post=instance, **work_day)
+
+        # 3. Cập nhật các field cơ bản còn lại
+        return super().update(instance, validated_data)
