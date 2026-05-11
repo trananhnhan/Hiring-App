@@ -35,12 +35,12 @@ class JobPostListSerializer(serializers.ModelSerializer):
     career_fields = CareerFieldSerializer(read_only=True,many=True)
     address = CompanyAddressSerializer(read_only=True)
     application_count = serializers.IntegerField(default=0,read_only=True)
-    employer = MiniEmployerSerializer(read_only=True)
+    employer_profile = MiniEmployerSerializer(read_only=True)
     class Meta:
         model = JobPost
         fields = ['id','uuid','career_fields','address',
                   'title','job_thumbnail','salary_min',
-                  'salary_max','slot','expiry_date','employer','status','application_count']
+                  'salary_max','slot','expiry_date','employer_profile','status','application_count']
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
@@ -50,7 +50,7 @@ class JobPostListSerializer(serializers.ModelSerializer):
 
 
 class JobPostDetailSerializer(JobPostListSerializer):
-    user = SimpleUserSerializer(source='employer.user',read_only=True)
+    user = SimpleUserSerializer(source='employer_profile.user',read_only=True)
     work_days = WorkDaySerializer(many=True)
     career_fields_id = serializers.PrimaryKeyRelatedField(
         queryset= CareerField.objects.all(),

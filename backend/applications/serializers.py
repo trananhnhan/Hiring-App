@@ -39,7 +39,7 @@ class DetailEmployerApplicationSerializer(serializers.ModelSerializer):
         fields = ['candidate_user']
         model = JobApplication
 
-class DetailApplicationSerializer(SimpleApplicationSerializer):
+class RetrieveApplicationSerializer(SimpleApplicationSerializer):
     detail = serializers.SerializerMethodField()
 
     class Meta:

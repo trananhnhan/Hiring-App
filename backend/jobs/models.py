@@ -50,7 +50,7 @@ class CareerField(BaseModel):
 
 class JobPost(BaseModel):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True, db_index=True)
-    employer = models.ForeignKey(EmployerProfile,on_delete=models.CASCADE,related_name='job_posts')
+    employer_profile = models.ForeignKey(EmployerProfile,on_delete=models.CASCADE,related_name='job_posts')
     career_fields = models.ManyToManyField(CareerField,related_name='job_posts')
     address = models.ForeignKey(CompanyAddress,on_delete=models.SET_NULL,related_name='job_posts',null=True)
     title = models.CharField(max_length=255)
@@ -72,7 +72,7 @@ class JobPost(BaseModel):
 
         if self.status == JobPostStatus.OPEN and self.expiry_date <= timezone.now():
             raise ValidationError({"expiry_date": "Expiry date must be in the future for OPEN status."})
-        if self.address and self.employer:
+        if self.address and self.employer_profile:
             if self.address.employer_id != self.employer_id:
                 raise ValidationError({
                     'address' : 'Address does not belong to this employer.'

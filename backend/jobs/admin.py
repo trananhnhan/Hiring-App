@@ -16,9 +16,9 @@ class CareerFieldAdmin(admin.ModelAdmin):
 
 @admin.register(JobPost)
 class JobPostAdmin(admin.ModelAdmin):
-    list_display = ['id', 'title', 'employer', 'status', 'expiry_date', 'active']
+    list_display = ['id', 'title', 'employer_profile', 'status', 'expiry_date', 'active']
     list_filter = ['status', 'active', 'created_date']
-    search_fields = ['title', 'employer__company_name', 'employer__user__username']
+    search_fields = ['title', 'employer_profile__company_name', 'employer_profile__user__username']
 
 
     filter_horizontal = ['career_fields']

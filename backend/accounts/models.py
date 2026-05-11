@@ -105,7 +105,7 @@ class Ward(BaseModel):
         return f"{self.name}, {self.district.name}, {self.district.province.name}"
 
 class CompanyAddress(BaseModel):
-    employer = models.ForeignKey(EmployerProfile, on_delete=models.CASCADE, related_name='addresses')
+    employer_profile = models.ForeignKey(EmployerProfile, on_delete=models.CASCADE, related_name='addresses')
     ward = models.ForeignKey(Ward, on_delete=models.SET_NULL, null=True)
     full_address = models.CharField(max_length=255)
     latitude = models.FloatField(null=True, blank=True)
@@ -113,14 +113,14 @@ class CompanyAddress(BaseModel):
 
 
 class CompanyVerificationImage(BaseModel):
-    employer = models.ForeignKey(EmployerProfile, on_delete=models.CASCADE, related_name='verification_images')
+    employer_profile = models.ForeignKey(EmployerProfile, on_delete=models.CASCADE, related_name='verification_images')
     image = CloudinaryField('verification_image')
 
     def clean(self):
         super().clean()
-        if not self.pk and self.employer.verification_images.count() >= 10:
+        if not self.pk and self.employer_profile.verification_images.count() >= 10:
             raise ValidationError("An employer cannot have more than 10 verification images.")
 
 
     def __str__(self):
-        return self.employer.user.username
+        return self.employer_profile.user.username

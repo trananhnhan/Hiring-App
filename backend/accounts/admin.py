@@ -55,12 +55,12 @@ class WardAdmin(admin.ModelAdmin):
 @admin.register(CompanyAddress)
 class CompanyAddressAdmin(admin.ModelAdmin):
 
-    list_display = ('id', 'employer', 'ward', 'full_address')
+    list_display = ('id', 'employer_profile', 'ward', 'full_address')
 
-    list_select_related = ('employer', 'ward', 'ward__district', 'ward__district__province')
+    list_select_related = ('employer_profile', 'ward', 'ward__district', 'ward__district__province')
 
 
 @admin.register(CompanyVerificationImage)
 class CompanyVerificationImageAdmin(admin.ModelAdmin):
-    list_display = ('id', 'employer')
-    list_select_related = ('employer',)
+    list_display = ('id', 'employer_profile')
+    list_select_related = ('employer_profile',)

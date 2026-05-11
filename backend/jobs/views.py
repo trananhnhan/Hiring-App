@@ -23,14 +23,14 @@ class JobPostViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend, filters.SearchFilter,filters.OrderingFilter]
     filterset_class = JobPostListFilter
 
-    search_fields = ['title', 'description', 'employer__company_name']
+    search_fields = ['title', 'description', 'employer_profile__company_name']
     ordering_fields = ['created_date','salary_max','salary_min']
     ordering = ['-id']
 
     def get_queryset(self):
 
         qs = (super().get_queryset().select_related(
-            'employer','address',
+            'employer_profile','address',
             'address__ward','address__ward__district','address__ward__district__province'
         ).prefetch_related('career_fields','work_days')
         # .annotate(
@@ -40,7 +40,7 @@ class JobPostViewSet(viewsets.ModelViewSet):
         if self.action == 'list':
             qs = qs.filter(status = JobPostStatus.OPEN).filter(expiry_date__gt=timezone.now()).all()
         else:
-            qs = qs.select_related('employer__user')
+            qs = qs.select_related('employer_profile__user')
         return qs
 
     def get_serializer_class(self):
@@ -49,7 +49,7 @@ class JobPostViewSet(viewsets.ModelViewSet):
         return JobPostDetailSerializer
 
     def perform_create(self, serializer):
-        serializer.save(employer = self.request.user.employer_profile)
+        serializer.save(employer_profile = self.request.user.employer_profile)
 
     def get_permissions(self):
         if self.action in ['create']:

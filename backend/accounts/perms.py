@@ -9,6 +9,12 @@ class IsBasicUser(permissions.IsAuthenticated):
             return False
         return request.user.role in [UserRole.EMPLOYER, UserRole.CANDIDATE]
 
+class IsCandidate(permissions.IsAuthenticated):
+    def has_permission(self, request, view):
+        if not super().has_permission(request, view):
+            return False
+        return request.user.role == UserRole.CANDIDATE
+
 class IsEmployer(permissions.IsAuthenticated):
     def has_permission(self, request, view):
         if not super().has_permission(request, view):
