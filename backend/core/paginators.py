@@ -17,5 +17,6 @@ class BaseCustomPaginator(pagination.PageNumberPagination):
             'previous': self.get_previous_link(),
             'results': data
         })
-class JobPostPaginator(BaseCustomPaginator):
+
+class BasePaginator(BaseCustomPaginator):
     page_size = 4

@@ -5,7 +5,7 @@ from cloudinary.models import CloudinaryField
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 from core.shared import BaseModel
-
+import uuid
 
 class UserRole(models.TextChoices):
     EMPLOYER = 'EMPLOYER', 'Employer'
@@ -40,7 +40,7 @@ class User(AbstractUser):
         choices= UserRole.choices,
         default = UserRole.CANDIDATE
     )
-    bio = models.TextField(null=True,blank = True)
+
 
     def save(self,*args,**kwargs):
         if self.role == UserRole.SUPER_USER:
@@ -58,7 +58,7 @@ class CandidateProfile(models.Model):
     user = models.OneToOneField(User, on_delete= models.CASCADE, related_name='candidate_profile')
     phone = models.CharField(max_length=15, null=True,blank=True)
     date_of_birth = models.DateField(null=True, blank=True)
-
+    bio = models.TextField(null=True, blank=True)
     def __str__(self):
         return self.user.username
 
@@ -105,6 +105,7 @@ class Ward(BaseModel):
         return f"{self.name}, {self.district.name}, {self.district.province.name}"
 
 class CompanyAddress(BaseModel):
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True, db_index=True)
     employer_profile = models.ForeignKey(EmployerProfile, on_delete=models.CASCADE, related_name='addresses')
     ward = models.ForeignKey(Ward, on_delete=models.SET_NULL, null=True)
     full_address = models.CharField(max_length=255)
@@ -113,6 +114,7 @@ class CompanyAddress(BaseModel):
 
 
 class CompanyVerificationImage(BaseModel):
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True, db_index=True)
     employer_profile = models.ForeignKey(EmployerProfile, on_delete=models.CASCADE, related_name='verification_images')
     image = CloudinaryField('verification_image')
 

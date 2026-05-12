@@ -1,6 +1,6 @@
 import requests
-from rest_framework import viewsets,generics,status,permissions
-from rest_framework.generics import mixins
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import viewsets, generics, status, permissions, mixins, filters
 from rest_framework.permissions import AllowAny
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -9,13 +9,36 @@ from rest_framework.views import APIView
 
 from accounts.models import User,UserRole
 from accounts import serializers,perms
+from accounts.perms import IsCandidate, IsEmployer
+from accounts.serializers import UpdateEmployerProfileSerializer
+from applications.filters import ResumeListFilter
+from applications.serializers import UpdateCandidateApplicationSerializer, SimpleResumeSerializer
 from core import settings
 from core.settings import env
 
 
-class SignUpView(generics.CreateAPIView):
-    serializer_class = serializers.UserSerializer
-    permission_classes = [AllowAny]
+class UpdateCandidateMeProfileView(generics.UpdateAPIView):
+    serializer_class = UpdateCandidateApplicationSerializer
+    permission_classes = [IsCandidate]
+    http_method_names = ['patch']
+    def get_object(self):
+        return self.request.user.candidate_profile
+
+class ListCandidateMeResumeView(generics.ListAPIView):
+    serializer_class = SimpleResumeSerializer
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_class = ResumeListFilter
+
+    search_fields = ['title', 'description']
+    ordering_fields = ['created_date']
+
+class UpdateEmployerMeProfileView(generics.UpdateAPIView):
+    serializer_class = UpdateEmployerProfileSerializer
+    permission_classes = [IsEmployer]
+    http_method_names = ['patch']
+
+    def get_object(self):
+        return self.request.user.employer_profile
 
 class CurrentUserViewSet(viewsets.ViewSet):
     permission_classes = [permissions.IsAuthenticated]
@@ -46,6 +69,10 @@ class CurrentUserViewSet(viewsets.ViewSet):
         else:
             print("something went wrong !!")
 
+
+class SignUpView(generics.CreateAPIView):
+    serializer_class = serializers.UserSerializer
+    permission_classes = [AllowAny]
 
 class LoginView(APIView):
     permission_classes = [AllowAny]

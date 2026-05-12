@@ -1,4 +1,6 @@
 from rest_framework import serializers
+
+from core.shared import CloudinaryImageMixin
 from .models import User, UserRole, CompanyAddress, EmployerProfile, CandidateProfile,CompanyVerificationImage,District,Province,Ward
 
 class ProvinceSerializer(serializers.ModelSerializer):
@@ -33,7 +35,51 @@ class CompanyVerificationImageSerializer(serializers.ModelSerializer):
         model = CompanyVerificationImage
         fields = ['id', 'image']
 
-class MiniUserSerializer(serializers.ModelSerializer):
+
+#employer
+class MiniEmployerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EmployerProfile
+        fields = ['company_name','company_description']
+
+class UpdateEmployerProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EmployerProfile
+        fields = ['company_name', 'tax_code', 'company_description']
+
+class SimpleEmployerSerializer(serializers.ModelSerializer):
+    addresses = CompanyAddressSerializer(many=True,read_only=True)
+    class Meta:
+        model = EmployerProfile
+        fields = ['company_name','company_description','is_verified','addresses']
+
+class EmployerSerializer(SimpleEmployerSerializer):
+
+    verification_images = CompanyVerificationImageSerializer(many=True, read_only=True)
+    class Meta:
+        model = SimpleEmployerSerializer.Meta.model
+        fields = SimpleEmployerSerializer.Meta.fields + ['tax_code','verification_images',]
+
+
+#candidate
+class SimpleCandidateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CandidateProfile
+        fields = ['date_of_birth']
+
+class UpdateCandidateProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CandidateProfile
+        fields = ['phone', 'date_of_birth', 'bio']
+
+class CandidateSerializer(SimpleCandidateSerializer):
+    class Meta:
+        model = SimpleCandidateSerializer.Meta.model
+        fields = SimpleCandidateSerializer.Meta.fields +['phone']
+
+#user
+class MiniUserSerializer(CloudinaryImageMixin, serializers.ModelSerializer):
+    cloudinary_fields = ['avatar']
     name = serializers.SerializerMethodField()
     class Meta:
         model = User
@@ -46,17 +92,11 @@ class MiniUserSerializer(serializers.ModelSerializer):
     def get_name(self,obj):
         return f"{obj.last_name} {obj.first_name}".strip()
 
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        if instance.avatar:
-            data['avatar'] = instance.avatar.url
-        return data
-
 class SimpleUserSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField()
     class Meta:
         model = User
-        fields = ['id', 'first_name', 'last_name','name', 'role', 'avatar','username', 'email']
+        fields = [ 'first_name', 'last_name','name', 'role', 'avatar','username', 'email']
         extra_kwargs = {
             'first_name': {'write_only': True},
             'last_name': {'write_only': True},
@@ -93,37 +133,6 @@ class UserSerializer(SimpleUserSerializer):
         user.set_password(validated_data['password'])
         user.save()
         return user
-
-class MiniEmployerSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = EmployerProfile
-        fields = ['company_name','company_description']
-
-
-class SimpleEmployerSerializer(serializers.ModelSerializer):
-    addresses = CompanyAddressSerializer(many=True,read_only=True)
-    class Meta:
-        model = EmployerProfile
-        fields = ['id','company_name','company_description','is_verified','addresses']
-
-class EmployerSerializer(SimpleEmployerSerializer):
-
-    verification_images = CompanyVerificationImageSerializer(many=True, read_only=True)
-    class Meta:
-        model = SimpleEmployerSerializer.Meta.model
-        fields = SimpleEmployerSerializer.Meta.fields + ['tax_code','verification_images',]
-
-
-
-class SimpleCandidateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CandidateProfile
-        fields = ['id','date_of_birth']
-
-class CandidateSerializer(SimpleCandidateSerializer):
-    class Meta:
-        model = SimpleCandidateSerializer.Meta.model
-        fields = SimpleCandidateSerializer.Meta.fields +['phone']
 
 class CurrentUserSerializer(SimpleUserSerializer):
     profile = serializers.SerializerMethodField()

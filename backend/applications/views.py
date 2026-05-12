@@ -3,9 +3,11 @@ from rest_framework import mixins, viewsets
 from rest_framework import permissions
 
 from accounts.models import UserRole
-from accounts.perms import IsCandidate
+from accounts.perms import IsCandidate, IsBasicUser
 from applications import serializers
-from applications.models import JobApplication
+from applications.models import JobApplication, Resume
+from applications.perms import IsResumeOwner, DetailResumePermission
+from applications.serializers import DetailResumeSerializer
 
 
 # Create your views here.
@@ -40,9 +42,35 @@ class JobApplicationViewSet(mixins.CreateModelMixin,
             return serializers.CreateApplicationSerializer
 
         if self.action == 'partial_update':
-            if self.request.user.role == UserRole.CANDIDATE:
+            if getattr(self.request.user, 'role', None) == UserRole.CANDIDATE:
                 return serializers.UpdateCandidateApplicationSerializer
-            elif self.request.user.role == UserRole.EMPLOYER:
+            elif getattr(self.request.user, 'role', None) == UserRole.EMPLOYER:
                 return serializers.UpdateEmployerApplicationSerializer
 
         return serializers.RetrieveApplicationSerializer
+
+
+class ResumeViewSet(mixins.CreateModelMixin,
+                    mixins.RetrieveModelMixin,
+                    mixins.UpdateModelMixin,
+                    mixins.DestroyModelMixin,
+                    viewsets.GenericViewSet):
+    serializer_class = DetailResumeSerializer
+    permission_classes = [IsBasicUser]
+    lookup_field = 'uuid'
+    http_method_names = ['get', 'post', 'patch', 'delete']
+    queryset = Resume.objects.filter(active = True).select_related('candidate_profile__user').prefetch_related('career_fields')
+
+    def get_permissions(self):
+        if self.action == 'retrieve':
+            return [DetailResumePermission()]
+        elif self.action == 'create':
+            return [IsCandidate()]
+        elif self.action in ['partial_update', 'destroy']:
+            return [IsCandidate(), IsResumeOwner()]
+        else:
+            return [IsBasicUser()]
+
+
+    def perform_create(self, serializer):
+        serializer.save(candidate_profile=self.request.user.candidate_profile)

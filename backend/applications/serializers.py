@@ -1,26 +1,41 @@
 from django.utils import timezone
 from rest_framework import serializers
-
+from core import shared
 from accounts.models import UserRole
 from accounts.serializers import MiniUserSerializer
 from applications.models import JobApplication, Resume, ResumeStatus, ApplicationResult
-from jobs.models import JobPost, JobPostStatus
-from jobs.serializers import SimpleJobPostSerializer
+from jobs.models import JobPost, JobPostStatus, CareerField
+from jobs.serializers import SimpleJobPostSerializer, CareerFieldSerializer
+
 
 class SimpleResumeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Resume
-        fields = ['title','updated_date']
+        fields = ['title','updated_date','uuid']
+
+class DetailResumeSerializer(shared.CloudinaryImageMixin,SimpleResumeSerializer):
+    cloudinary_fields = ['resume_img']
+    candidate_user = MiniUserSerializer(read_only=True,source='resume.candidate_profile.user')
+    career_fields = CareerFieldSerializer(read_only=True, many=True)
+    career_fields_id = serializers.PrimaryKeyRelatedField(
+        queryset= CareerField.objects.all(),
+        source= 'career_fields',
+        write_only= True,
+        many=True
+    )
+    class Meta:
+        model = SimpleResumeSerializer.Meta.model
+        fields = SimpleResumeSerializer.Meta.fields + ['candidate_user','resume_img','description','status','career_fields','career_fields_id']
 
 class ListApplicationSerializer(serializers.ModelSerializer):
-    candidate_user = MiniUserSerializer(read_only=True)
+    candidate_user = MiniUserSerializer(read_only=True,source='resume.candidate_profile.user')
 
     class Meta:
         fields = ['created_date','result','candidate_user']
         model = JobApplication
 
 class SimpleApplicationSerializer(serializers.ModelSerializer):
-    resume = SimpleResumeSerializer(read_only=True, source='resume.candidate_profile.user')
+    resume = SimpleResumeSerializer(read_only=True)
 
     class Meta:
         fields = ['resume','created_date','message','result','result_detail']
@@ -133,3 +148,4 @@ class CreateApplicationSerializer(serializers.ModelSerializer):
                 "detail": "Bạn đã nộp hồ sơ này cho vị trí này rồi."
             })
         return attrs
+

@@ -2,11 +2,15 @@ from django.db.models.aggregates import Count
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets,filters,generics,mixins
+from rest_framework.decorators import action
+from rest_framework.response import Response
 
 from accounts.perms import IsBasicUser, IsEmployer, IsVerifiedEmployer
+from applications.models import JobApplication
+from applications.serializers import ListApplicationSerializer
 from jobs.perms import IsJobPostOwner
 from jobs.filters import JobPostListFilter
-from core.paginators import JobPostPaginator
+from core.paginators import BasePaginator
 from jobs.models import JobPost, JobPostStatus
 from jobs.serializers import JobPostListSerializer, JobPostDetailSerializer
 
@@ -19,7 +23,7 @@ class JobPostViewSet(viewsets.ModelViewSet):
 
     queryset = JobPost.objects.filter(active = True).all()
     lookup_field = 'uuid'
-    pagination_class = JobPostPaginator
+    pagination_class = BasePaginator
     filter_backends = [DjangoFilterBackend, filters.SearchFilter,filters.OrderingFilter]
     filterset_class = JobPostListFilter
 
@@ -33,12 +37,14 @@ class JobPostViewSet(viewsets.ModelViewSet):
             'employer_profile','address',
             'address__ward','address__ward__district','address__ward__district__province'
         ).prefetch_related('career_fields','work_days')
-        # .annotate(
-        #     application_count = Count('job_applications')
-        # )
+        .annotate(
+            application_count = Count('job_applications')
+        )
         )
         if self.action == 'list':
             qs = qs.filter(status = JobPostStatus.OPEN).filter(expiry_date__gt=timezone.now()).all()
+        elif self.action == 'get_applications':
+            qs = super().get_queryset()
         else:
             qs = qs.select_related('employer_profile__user')
         return qs
@@ -54,6 +60,18 @@ class JobPostViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         if self.action in ['create']:
             return [IsVerifiedEmployer()]
-        elif self.action in ['update','partial_update','destroy']:
+        elif self.action in ['update', 'partial_update', 'destroy', 'get_applications']:
             return [IsJobPostOwner(),IsVerifiedEmployer()]
         return [IsBasicUser()]
+
+    @action(detail=True,methods=['get'],url_path='job-application')
+    def get_applications(self,request,uuid = None):
+        job_post = self.get_object()
+
+        applications = JobApplication.objects.filter(job_post=job_post).select_related('resume__candidate_profile__user').order_by('-id')
+        page = self.paginate_queryset(applications)
+        if page is not None:
+            serializer = ListApplicationSerializer(page,many=True)
+            return self.get_paginated_response(serializer.data)
+        serializer = ListApplicationSerializer(applications, many=True, context={'request': request})
+        return Response(serializer.data)
