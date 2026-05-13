@@ -1,3 +1,5 @@
+from datetime import date
+
 from rest_framework import serializers
 
 from core.shared import CloudinaryImageMixin
@@ -16,6 +18,13 @@ class WardSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ward
         fields = ['id','name']
+
+# CompanyAddress
+class MiniCompanyAddressSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CompanyAddress
+        fields = ['full_address']
+
 class CompanyAddressSerializer(serializers.ModelSerializer):
     district = DistrictSerializer(read_only=True)
     province = ProvinceSerializer(read_only=True)
@@ -27,13 +36,13 @@ class CompanyAddressSerializer(serializers.ModelSerializer):
     )
     class Meta:
         model = CompanyAddress
-        fields = ['id', 'full_address', 'latitude', 'longitude','ward_id' ,'ward','district','province']
+        fields = ['uuid', 'full_address', 'latitude', 'longitude','ward_id' ,'ward','district','province']
 
-
+# CompanyVerificationImage
 class CompanyVerificationImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = CompanyVerificationImage
-        fields = ['id', 'image']
+        fields = ['uuid', 'image']
 
 
 #employer
@@ -46,6 +55,8 @@ class UpdateEmployerProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = EmployerProfile
         fields = ['company_name', 'tax_code', 'company_description']
+
+
 
 class SimpleEmployerSerializer(serializers.ModelSerializer):
     addresses = CompanyAddressSerializer(many=True,read_only=True)
@@ -151,3 +162,23 @@ class CurrentUserSerializer(SimpleUserSerializer):
         if obj.role == UserRole.CANDIDATE:
             return CandidateSerializer(obj.candidate_profile).data
         return None
+
+#employer
+class PublicEmployerProfileSerializer(serializers.ModelSerializer):
+    user = MiniUserSerializer(read_only=True)
+    addresses = MiniCompanyAddressSerializer(read_only=True,many=True)
+    class Meta:
+        model = EmployerProfile
+        fields = ['company_name','company_description','user','addresses']
+
+class PublicCandidateProfileSerializer(serializers.ModelSerializer):
+    user = MiniUserSerializer(read_only=True)
+    approximate_age = serializers.SerializerMethodField()
+    class Meta:
+        model = CandidateProfile
+        fields = ['user','bio','approximate_age']
+
+    def get_approximate_age(self, obj):
+        if not obj.date_of_birth:
+            return None
+        return date.today().year - obj.date_of_birth.year

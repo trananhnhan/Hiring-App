@@ -2,7 +2,9 @@ from django.utils import timezone
 from rest_framework import serializers
 
 from accounts.models import CompanyAddress
-from accounts.serializers import CompanyAddressSerializer, SimpleUserSerializer, SimpleEmployerSerializer, MiniEmployerSerializer
+from accounts.serializers import CompanyAddressSerializer, SimpleUserSerializer, SimpleEmployerSerializer, \
+    MiniEmployerSerializer, MiniCompanyAddressSerializer
+from core.shared import CloudinaryImageMixin
 from jobs.models import WorkDay, CareerField, JobPost, JobPostStatus
 
 
@@ -31,9 +33,10 @@ class SimpleJobPostSerializer(serializers.ModelSerializer):
         model = JobPost
         fields = ['title','job_thumbnail']
 
-class JobPostListSerializer(serializers.ModelSerializer):
+class JobPostListSerializer(CloudinaryImageMixin, serializers.ModelSerializer):
+    cloudinary_fields = ['job_thumbnail']
     career_fields = CareerFieldSerializer(read_only=True,many=True)
-    address = CompanyAddressSerializer(read_only=True)
+    address = MiniCompanyAddressSerializer(read_only=True)
     application_count = serializers.IntegerField(default=0,read_only=True)
     employer_profile = MiniEmployerSerializer(read_only=True)
     class Meta:
@@ -42,15 +45,11 @@ class JobPostListSerializer(serializers.ModelSerializer):
                   'title','job_thumbnail','salary_min',
                   'salary_max','slot','expiry_date','employer_profile','status','application_count']
 
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        if instance.job_thumbnail:
-            data['job_thumbnail'] = instance.job_thumbnail.url
-        return data
 
 
 class JobPostDetailSerializer(JobPostListSerializer):
     user = SimpleUserSerializer(source='employer_profile.user',read_only=True)
+    address = CompanyAddressSerializer(read_only=True)
     work_days = WorkDaySerializer(many=True)
     career_fields_id = serializers.PrimaryKeyRelatedField(
         queryset= CareerField.objects.all(),

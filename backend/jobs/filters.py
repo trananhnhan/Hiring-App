@@ -24,7 +24,7 @@ class JobPostListFilter(django_filters.FilterSet):
             Q(salary_min__isnull = True, salary_max__gte=value)|
             Q(salary_min__isnull=True, salary_max__isnull=True)
         )
-class JobPostOwnerListFilter(JobPostListFilter):
+class JobPostListOwnerFilter(JobPostListFilter):
     class Meta:
         model = JobPostListFilter.Meta.model
         fields = JobPostListFilter.Meta.fields + ['status']

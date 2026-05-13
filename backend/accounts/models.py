@@ -108,10 +108,16 @@ class CompanyAddress(BaseModel):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True, db_index=True)
     employer_profile = models.ForeignKey(EmployerProfile, on_delete=models.CASCADE, related_name='addresses')
     ward = models.ForeignKey(Ward, on_delete=models.SET_NULL, null=True)
-    full_address = models.CharField(max_length=255)
+    full_address = models.CharField(max_length=255, default='')
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
 
+    def save(self,*args,**kwargs):
+        if self.full_address == '':
+            self.full_address = self.ward.__str__()
+        super().save(*args,**kwargs)
+    def __str__(self):
+        return self.full_address
 
 class CompanyVerificationImage(BaseModel):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True, db_index=True)

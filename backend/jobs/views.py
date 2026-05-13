@@ -28,7 +28,7 @@ class JobPostViewSet(viewsets.ModelViewSet):
     filterset_class = JobPostListFilter
 
     search_fields = ['title', 'description', 'employer_profile__company_name']
-    ordering_fields = ['created_date','salary_max','salary_min']
+    ordering_fields = ['id','salary_max','salary_min']
     ordering = ['-id']
 
     def get_queryset(self):

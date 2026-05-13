@@ -26,7 +26,7 @@ class Resume(BaseModel):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True, db_index=True)
     candidate_profile = models.ForeignKey(CandidateProfile,on_delete=models.CASCADE,related_name='resumes')
     career_fields = models.ManyToManyField(CareerField, related_name='resumes', blank=True)
-    description = models.TextField(blank=True, null=True,db_index=True)
+    description = models.TextField(blank=True, null=True)
     title = models.CharField(max_length=255, db_index=True)
     resume_img = CloudinaryField( blank=True, null=True)
     status = models.CharField(max_length=10,choices=ResumeStatus.choices, default=ResumeStatus.DRAFT)
@@ -62,7 +62,7 @@ class JobApplication(BaseModel):
             })
 
     def __str__(self):
-        return f"Application: {self.resume.candidate.user.username} -> {self.job_post.title}"
+        return f"Application: {self.resume.candidate_profile.user.username} -> {self.job_post.title}"
 
 
 
