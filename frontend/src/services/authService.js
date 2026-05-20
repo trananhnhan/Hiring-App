@@ -1,40 +1,61 @@
 import axios from "axios";
-import { BASE_URL, CLIENT_ID, CLIENT_SECRET } from "../constants/config";
+import { BASE_URL, CLIENT_ID, CLIENT_SECRET, STORAGE_KEYS } from "../constants/config";
 import { endpoints } from "../constants/endpoints";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 
 export const authServices = {
-    loginAPI: async (username, password) => {
-        try {
+    login: async (username, password) => {
 
-            const respone = await axios.post(BASE_URL + endpoints.auth.login, {
-                grant_type: 'password',
-                username: username,
-                password: password,
-                client_id: CLIENT_ID,
-                client_secret: CLIENT_SECRET,
-            }, {
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                }
-            });
-            return respone.data
-        }
-        catch (error) {
-            throw error;
-        }
+        const respone = await axios.post(BASE_URL + endpoints.auth.login, {
+            username: username,
+            password: password,
+        }, {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        });
+        return respone.data
 
     },
-    registerAPI: async (formData) => {
-        try {
-            const respone = await axios.post(BASE_URL + endpoints.auth.register, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            });
-        }
-        catch (error) {
-            throw error
-        }
+    register: async (formData) => {
+
+        const respone = await axios.post(BASE_URL + endpoints.auth.register, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        
+
+    },
+    logout: async () => {
+
+            const refreshToken = await AsyncStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN)
+            const accessToken = await AsyncStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN)
+
+            if (!refreshToken) throw new Error('no refresh token found');
+            if (!accessToken) throw new Error('no accsess token found');
+
+            await axios.post(BASE_URL + endpoints.auth.logout,
+                {
+                    refresh_token : refreshToken,
+                    access_token : accessToken
+                }
+            )
+
+
+            
+    },
+    refresh: async () => {
+
+            refreshToken = await AsyncStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN)
+            if (!refreshToken) throw new Error('no refresh token found');
+
+            const respone = await axios.post(BASE_URL + endpoints.auth.refresh,{
+                refresh_token : refreshToken
+            })
+            return respone.data
+        
+
     }
 }

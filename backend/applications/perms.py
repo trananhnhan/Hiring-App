@@ -1,3 +1,4 @@
+from accounts.models import UserRole
 from accounts.perms import IsBasicUser
 from applications.models import ResumeStatus
 
@@ -13,3 +14,13 @@ class DetailResumePermission(IsBasicUser):
             return True
 
         return obj.status not in [ResumeStatus.DRAFT,ResumeStatus.PRIVATE]
+
+
+class IsApplicationParticipant(IsBasicUser):
+    def has_object_permission(self, request, view, obj):
+        user = request.user
+        if user.role == UserRole.CANDIDATE:
+            return obj.resume.candidate_profile == user.candidate_profile
+        if user.role == UserRole.EMPLOYER:
+            return obj.job_post.employer_profile == user.employer_profile
+        return False

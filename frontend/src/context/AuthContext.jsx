@@ -1,5 +1,5 @@
 import { createContext, useEffect, useState } from "react";
-import api from "../services/api";
+import api, { setLogout } from "../services/api";
 import { endpoints } from "../constants/endpoints";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { STORAGE_KEYS } from "../constants/config";
@@ -41,6 +41,7 @@ export const AuthProvider = ({ children }) => {
 
     useEffect( ()=>{
        checkAuthStatus()
+       setLogout(logout)
     },[])
     
     // save token, get user context

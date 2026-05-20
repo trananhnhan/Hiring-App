@@ -20,3 +20,6 @@ class BaseCustomPaginator(pagination.PageNumberPagination):
 
 class BasePaginator(BaseCustomPaginator):
     page_size = 4
+
+class ApplicationPaginator(BaseCustomPaginator):
+    page_size = 10

@@ -1,7 +1,7 @@
 from django.db.models.aggregates import Count
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets,filters,generics,mixins
+from rest_framework import viewsets, filters, generics, mixins, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
@@ -11,8 +11,9 @@ from applications.serializers import ListApplicationSerializer
 from jobs.perms import IsJobPostOwner
 from jobs.filters import JobPostListFilter
 from core.paginators import BasePaginator
-from jobs.models import JobPost, JobPostStatus
-from jobs.serializers import JobPostListSerializer, JobPostDetailSerializer
+from jobs.models import JobPost, JobPostStatus, CareerField
+from jobs.serializers import JobPostListSerializer, JobPostDetailSerializer, CareerFieldSerializer, \
+    NestedCareerFieldSerializer
 
 
 # Create your views here.
@@ -27,7 +28,7 @@ class JobPostViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend, filters.SearchFilter,filters.OrderingFilter]
     filterset_class = JobPostListFilter
 
-    search_fields = ['title', 'description', 'employer_profile__company_name']
+    search_fields = ['title']
     ordering_fields = ['id','salary_max','salary_min']
     ordering = ['-id']
 
@@ -73,5 +74,13 @@ class JobPostViewSet(viewsets.ModelViewSet):
         if page is not None:
             serializer = ListApplicationSerializer(page,many=True)
             return self.get_paginated_response(serializer.data)
-        serializer = ListApplicationSerializer(applications, many=True, context={'request': request})
+        serializer = ListApplicationSerializer(applications, many=True)
         return Response(serializer.data)
+
+class ListCareerFieldView(mixins.ListModelMixin,viewsets.GenericViewSet):
+    queryset = CareerField.objects.filter(
+        parent__isnull=True
+    ).prefetch_related('children').order_by('field_name')
+
+    serializer_class = NestedCareerFieldSerializer
+    permission_classes = [permissions.IsAuthenticated]

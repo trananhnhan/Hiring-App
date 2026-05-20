@@ -1,16 +1,22 @@
 
-from rest_framework import mixins, viewsets
+from rest_framework import mixins, viewsets, status
 from rest_framework import permissions
+from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
 from accounts.models import UserRole
 from accounts.perms import IsCandidate, IsBasicUser
 from applications import serializers
 from applications.models import JobApplication, Resume
-from applications.perms import IsResumeOwner, DetailResumePermission
+from applications.perms import IsResumeOwner, DetailResumePermission, IsApplicationParticipant
 from applications.serializers import DetailResumeSerializer
+from interactions.models import CandidateComment, EmployerComment
+from interactions.serializers import CandidateCommentWriteSerializer, EmployerCommentWriteSerializer
 
 
 # Create your views here.
+
 
 class JobApplicationViewSet(mixins.CreateModelMixin,
                             mixins.RetrieveModelMixin,
@@ -48,6 +54,30 @@ class JobApplicationViewSet(mixins.CreateModelMixin,
                 return serializers.UpdateEmployerApplicationSerializer
 
         return serializers.RetrieveApplicationSerializer
+
+    @action(methods=['post', 'delete'], detail=True, url_path='comment',permission_classes=[IsApplicationParticipant])
+    def handle_comment(self, request, uuid=None):
+        job_application = self.get_object()
+
+        is_candidate = request.user.role == UserRole.CANDIDATE
+        CommentModel = CandidateComment if is_candidate else EmployerComment
+        author_profile = request.user.candidate_profile if is_candidate else request.user.employer_profile
+        SerializerClass = CandidateCommentWriteSerializer if is_candidate else EmployerCommentWriteSerializer
+
+        existing_comment = CommentModel.objects.filter(job_application=job_application).first()
+
+        if request.method == 'DELETE':
+            if not existing_comment:
+                return Response({"detail": "Chưa có đánh giá nào để xóa."}, status=status.HTTP_404_NOT_FOUND)
+            existing_comment.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        if request.method == 'POST':
+            serializer = SerializerClass(data=request.data, context={'job_application': job_application})
+            if serializer.is_valid():
+                serializer.save(job_application=job_application, comment_author=author_profile)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ResumeViewSet(mixins.CreateModelMixin,

@@ -9,9 +9,8 @@ import { AppNavigator } from './src/navigation/AppNavigator';
 export default function App() {
   return (
     <AuthProvider>
-      {/* Nếu xài paperTheme thì bọc vô: <PaperProvider theme={paperTheme}> */}
       <PaperProvider> 
-        <AppNavigator />
+        <AppNavigator/>
       </PaperProvider>
     </AuthProvider>
   );

@@ -26,22 +26,43 @@ class WorkDaySerializer(serializers.ModelSerializer):
 class CareerFieldSerializer(serializers.ModelSerializer):
     class Meta:
         model = CareerField
-        fields = ['id', 'field_name']
+        fields = ['id', 'field_name',]
 
-class SimpleJobPostSerializer(serializers.ModelSerializer):
+
+class NestedCareerFieldSerializer(serializers.ModelSerializer):
+    children = serializers.SerializerMethodField()
+
+    class Meta:
+        model = CareerField
+        fields = ['id', 'field_name', 'children']
+
+    def get_children(self, obj):
+        children = obj.children.all()
+        if not children:
+            return []
+        return NestedCareerFieldSerializer(children, many=True).data
+
+class MiniJobPostSerializer(serializers.ModelSerializer):
     class Meta:
         model = JobPost
-        fields = ['title','job_thumbnail']
+        fields = ['title','uuid']
+
+class SimpleJobPostSerializer(CloudinaryImageMixin, serializers.ModelSerializer):
+    cloudinary_fields = ['job_thumbnail']
+
+    class Meta:
+        model = JobPost
+        fields = ['uuid','title','job_thumbnail']
 
 class JobPostListSerializer(CloudinaryImageMixin, serializers.ModelSerializer):
     cloudinary_fields = ['job_thumbnail']
-    career_fields = CareerFieldSerializer(read_only=True,many=True)
+
     address = MiniCompanyAddressSerializer(read_only=True)
     application_count = serializers.IntegerField(default=0,read_only=True)
     employer_profile = MiniEmployerSerializer(read_only=True)
     class Meta:
         model = JobPost
-        fields = ['id','uuid','career_fields','address',
+        fields = ['uuid','address',
                   'title','job_thumbnail','salary_min',
                   'salary_max','slot','expiry_date','employer_profile','status','application_count']
 

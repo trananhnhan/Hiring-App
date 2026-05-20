@@ -1,10 +1,16 @@
+import { BASE_URL } from "./config"
+
 export const endpoints = {
     auth : {
-        register : '/sign-up',
-        login : '/o/token/',
-        refreshToken : '/o/token/',
+        register : '/auth/sign-up',
+        login : '/auth/login',
+        refresh : '/auth/refresh',
+        logout: '/auth/logout',
     },
     users : {
-        currentUser : 'users/current-user/',
+        currentUser : '/users/me/',
+    },
+    jobPosts :{
+        list : '/job-posts/'
     }
 }

@@ -2,10 +2,11 @@ from django.utils import timezone
 from rest_framework import serializers
 from core import shared
 from accounts.models import UserRole
-from accounts.serializers import MiniUserSerializer
+from accounts.serializers import MiniUserSerializer, MiniEmployerSerializer
 from applications.models import JobApplication, Resume, ResumeStatus, ApplicationResult
 from jobs.models import JobPost, JobPostStatus, CareerField
 from jobs.serializers import SimpleJobPostSerializer, CareerFieldSerializer
+
 
 
 class SimpleResumeSerializer(serializers.ModelSerializer):
@@ -31,8 +32,20 @@ class ListApplicationSerializer(serializers.ModelSerializer):
     candidate_user = MiniUserSerializer(read_only=True,source='resume.candidate_profile.user')
 
     class Meta:
-        fields = ['created_date','result','candidate_user']
+        fields = ['uuid','created_date','result','candidate_user']
         model = JobApplication
+
+
+class CandidateJobApplicationListSerializer(serializers.ModelSerializer):
+    job_post = SimpleJobPostSerializer(read_only=True)
+    resume = SimpleResumeSerializer(read_only=True)
+    employer_profile = MiniEmployerSerializer(read_only=True, source='job_post.employer_profile')
+
+    class Meta:
+        model = JobApplication
+        fields = [
+            'uuid','job_post','resume','employer_profile', 'result', 'created_date'
+        ]
 
 class SimpleApplicationSerializer(serializers.ModelSerializer):
     resume = SimpleResumeSerializer(read_only=True)

@@ -1,4 +1,3 @@
-// src/components/ScreenWrapper.jsx
 import React from 'react';
 import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';

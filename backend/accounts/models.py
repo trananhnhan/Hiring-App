@@ -13,6 +13,11 @@ class UserRole(models.TextChoices):
     MODERATOR = 'MODERATOR', 'Moderator'
     SUPER_USER = 'SUPER_USER', 'Super User'
 
+class VerificationStatus(models.TextChoices):
+    PENDING = 'PENDING', 'Pending'
+    REJECTED = 'REJECTED', 'Rejected'
+    ACCEPTED = 'ACCEPTED', 'Accepted'
+
 class SimpleUserNameValidator(UnicodeUsernameValidator):
     regex = r"^[\w-]+\Z"
     message = _(
@@ -108,7 +113,7 @@ class CompanyAddress(BaseModel):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True, db_index=True)
     employer_profile = models.ForeignKey(EmployerProfile, on_delete=models.CASCADE, related_name='addresses')
     ward = models.ForeignKey(Ward, on_delete=models.SET_NULL, null=True)
-    full_address = models.CharField(max_length=255, default='')
+    full_address = models.CharField(max_length=255, default='', blank= True)
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
 
@@ -119,16 +124,25 @@ class CompanyAddress(BaseModel):
     def __str__(self):
         return self.full_address
 
+class VerificationRequest(BaseModel):
+    employer_profile = models.ForeignKey(
+        EmployerProfile, on_delete=models.CASCADE, related_name='verification_requests'
+    )
+    status = models.CharField(max_length=20,choices=VerificationStatus.choices,default=VerificationStatus.PENDING)
+
+
 class CompanyVerificationImage(BaseModel):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True, db_index=True)
-    employer_profile = models.ForeignKey(EmployerProfile, on_delete=models.CASCADE, related_name='verification_images')
+    verification_request = models.ForeignKey(
+        VerificationRequest, on_delete=models.CASCADE, related_name='images'
+    )
     image = CloudinaryField('verification_image')
 
     def clean(self):
         super().clean()
-        if not self.pk and self.employer_profile.verification_images.count() >= 10:
-            raise ValidationError("An employer cannot have more than 10 verification images.")
+        if not self.pk and self.verification_request.images.count() >= 10:
+            raise ValidationError("Không thể upload quá 10 ảnh xác thực.")
 
 
     def __str__(self):
-        return self.employer_profile.user.username
+        return self.verification_request.employer_profile.user.username

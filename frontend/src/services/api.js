@@ -1,12 +1,15 @@
 import axios from "axios";
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { CLIENT_ID, CLIENT_SECRET, STORAGE_KEYS, BASE_URL } from "../constants/config";
+import { endpoints } from "../constants/endpoints";
+import { authServices } from "./authService";
 
 const api = axios.create({
     baseURL : BASE_URL,
     headers : {'Content-Type' : 'application/json'},
 })
-
+let logout = null;
+export const setLogout = (func) => logout = func;
 // add token to header
 api.interceptors.request.use(
     async (config) => {
@@ -32,15 +35,10 @@ api.interceptors.response.use(
                 const refreshToken = await AsyncStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
                 if (!refreshToken) throw new Error('no refresh token found');
 
-                const refreshRespone = await axios.post(`${BASE_URL}/o/token/`,{
-                    grant_type : 'refresh_token',
-                    refresh_token : refreshToken,
-                    client_id : CLIENT_ID,
-                    client_secret : CLIENT_SECRET,
-                });
+                const refreshData = await authServices.refresh()
 
-                const newAccessToken = refreshRespone.data.access_token;
-                const newRefreshToken = refreshRespone.data.refresh_token;
+                const newAccessToken = refreshData.access_token;
+                const newRefreshToken = refreshData.refresh_token;
 
                 await AsyncStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN,newAccessToken);
                 await AsyncStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN,newRefreshToken);
@@ -51,10 +49,11 @@ api.interceptors.response.use(
             catch (refreshError){
                 await AsyncStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
                 await AsyncStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
-                return Promise.reject(refreshError)
+                if (logout) logout();
+                return Promise.reject(refreshError);
             }
         }
-        return Promise.reject(error)
+        return Promise.reject(error);
     }
         
 )

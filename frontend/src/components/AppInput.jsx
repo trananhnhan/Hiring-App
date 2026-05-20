@@ -23,6 +23,7 @@ export const AppInput = ({
                 outlineColor= {errorText ? COLORS.error : COLORS.border}
                 activeOutlineColor= {errorText ? COLORS.error : COLORS.primary}
                 textColor= {COLORS.primary}
+
                 right = { isPassword ? 
                     (
                         <TextInput.Icon

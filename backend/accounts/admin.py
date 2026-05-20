@@ -2,7 +2,7 @@ from django.contrib import admin
 from .models import (
     User, CandidateProfile, EmployerProfile,
     Province, District, Ward,
-    CompanyAddress, CompanyVerificationImage
+    CompanyAddress, CompanyVerificationImage, VerificationRequest
 )
 
 
@@ -60,7 +60,27 @@ class CompanyAddressAdmin(admin.ModelAdmin):
     list_select_related = ('employer_profile', 'ward', 'ward__district', 'ward__district__province')
 
 
+# 1. Quên chưa đăng ký VerificationRequest nè, thêm vào để Admin còn có chỗ mà duyệt (ACCEPT/REJECT) nhé!
+ # Nhớ import vào
+
+
+@admin.register(VerificationRequest)
+class VerificationRequestAdmin(admin.ModelAdmin):
+    list_display = ('id', 'employer_profile', 'status', 'created_date')
+    list_filter = ('status',)
+    list_select_related = ('employer_profile', 'employer_profile__user')
+
+
+
 @admin.register(CompanyVerificationImage)
 class CompanyVerificationImageAdmin(admin.ModelAdmin):
-    list_display = ('id', 'employer_profile')
-    list_select_related = ('employer_profile',)
+    list_display = ('id', 'get_employer_profile', 'verification_request')
+
+
+    list_select_related = ('verification_request', 'verification_request__employer_profile')
+
+    def get_employer_profile(self, obj):
+
+        return obj.verification_request.employer_profile.company_name
+
+    get_employer_profile.short_description = 'Company Name'

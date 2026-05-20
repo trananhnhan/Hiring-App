@@ -4,13 +4,15 @@ import { NavigationContainer } from '@react-navigation/native';
 
 import { AuthContext } from '../context/AuthContext';
 import { AuthNavigator } from './AuthNavigator';
-import { MainNavigator } from './MainNavigator';
+
 import { COLORS } from '../constants/theme';
+import MainBottomTabs from './MainBottomTabs';
+import { GlobalDataProvider } from '../context/GlobalDataContext';
 
 export const AppNavigator = () => {
   const { user, isLoading } = useContext(AuthContext);
 
-  // Màn hình chờ lúc app đang lục tìm Token trong két sắt
+
   if (isLoading) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: COLORS.background }}>
@@ -20,8 +22,14 @@ export const AppNavigator = () => {
   }
   
   return (
-    <NavigationContainer>
-      {user ? <MainNavigator /> : <AuthNavigator />}
+<NavigationContainer>
+      {user ? (
+        <GlobalDataProvider>
+          <MainBottomTabs />
+        </GlobalDataProvider>
+      ) : (
+        <AuthNavigator />
+      )}
     </NavigationContainer>
   );
 };

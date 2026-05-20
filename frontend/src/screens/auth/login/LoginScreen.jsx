@@ -34,11 +34,17 @@ export const LoginScreen = () => {
     setIsLoading(true);
     setErrorMessage('');
     try {
-      const data = await authServices.loginAPI(username,password);
+      const data = await authServices.login(username,password);
       await onLoginSuccess(data.access_token,data.refresh_token);
     }
     catch( error){
-      setErrorMessage('Sai tài khoản hoặc mật khẩu. Vui lòng thử lại! ');
+      if (error.response?.data.error_description === "Invalid credentials given.") {
+          setErrorMessage('Sai tài khoản hoặc mật khẩu. Vui lòng thử lại!');
+      } else {
+          setErrorMessage('Lỗi kết nối với máy chủ!');
+      }
+      console.log('err at login screen: '+error)
+      console.log('err detail:', error.response?.data);
     }
     finally {
       setIsLoading(false);

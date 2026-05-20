@@ -49,7 +49,7 @@ class CompanyVerificationImageSerializer(serializers.ModelSerializer):
 class MiniEmployerSerializer(serializers.ModelSerializer):
     class Meta:
         model = EmployerProfile
-        fields = ['company_name','company_description']
+        fields = ['company_name']
 
 class UpdateEmployerProfileSerializer(serializers.ModelSerializer):
     class Meta:
@@ -103,7 +103,8 @@ class MiniUserSerializer(CloudinaryImageMixin, serializers.ModelSerializer):
     def get_name(self,obj):
         return f"{obj.last_name} {obj.first_name}".strip()
 
-class SimpleUserSerializer(serializers.ModelSerializer):
+class SimpleUserSerializer(CloudinaryImageMixin, serializers.ModelSerializer):
+    cloudinary_fields = ['avatar']
     name = serializers.SerializerMethodField()
     class Meta:
         model = User
@@ -118,11 +119,6 @@ class SimpleUserSerializer(serializers.ModelSerializer):
     def get_name(self,obj):
         return f"{obj.last_name} {obj.first_name}".strip()
 
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        if instance.avatar:
-            data['avatar'] = instance.avatar.url
-        return data
 
 class UserSerializer(SimpleUserSerializer):
     class Meta:
