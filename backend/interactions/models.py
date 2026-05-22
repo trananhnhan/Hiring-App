@@ -31,6 +31,9 @@ class CandidateComment(BaseModel):
         if self.job_application.result not in [ApplicationResult.ACCEPTED, ApplicationResult.REJECTED]:
             raise ValidationError("Chỉ được phép đánh giá khi đơn ứng tuyển đã có kết quả (Accepted/Rejected).")
 
+        if self.job_application.resume.candidate_profile != self.comment_author:
+            raise ValidationError("Ứng viên được chọn không phải là người đã nộp đơn ứng tuyển này!")
+
 class EmployerComment(BaseModel):
     job_application = models.OneToOneField(JobApplication, on_delete=models.CASCADE, related_name='employer_comment')
     comment_author = models.ForeignKey(EmployerProfile, on_delete=models.CASCADE, related_name='authored_comments')
@@ -42,3 +45,6 @@ class EmployerComment(BaseModel):
         super().clean()
         if self.job_application.result not in [ApplicationResult.ACCEPTED, ApplicationResult.REJECTED]:
             raise ValidationError("Chỉ được phép đánh giá khi đơn ứng tuyển đã có kết quả (Accepted/Rejected).")
+
+        if self.job_application.job_post.employer_profile != self.comment_author:
+            raise ValidationError("Công ty được chọn không phải là chủ sở hữu của bài đăng tuyển dụng này!")

@@ -24,5 +24,14 @@ export const jobServices = {
             }
         });
         return response.data;
+    },
+    
+    getEmployerJobPosts: async (page = 1, params = {}) => {
+        const response = await api.get(endpoints.employerProfile.listJobPost, { params: { page, ...params } });
+        return response.data;
+    },
+    getJobPostDetail : async(uuid) =>{
+        const response = await api.get(endpoints.jobPosts.retrieve(uuid));
+        return response.data;
     }
 }

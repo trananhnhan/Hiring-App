@@ -8,11 +8,11 @@ from jobs.serializers import MiniJobPostSerializer
 
 class EmployerReceivedCommentSerializer(serializers.ModelSerializer):
     job_post = MiniJobPostSerializer(read_only=True, source='job_application.job_post')
-    user = MiniUserSerializer(read_only=True, source='comment_author.user')
+    author = MiniUserSerializer(read_only=True, source='comment_author.user')
 
     class Meta:
         model = CandidateComment
-        fields = ['id','review', 'recommendation_rate', 'created_date', 'user', 'job_post']
+        fields = ['id','review', 'recommendation_rate', 'created_date', 'author', 'job_post']
 
 class EmployerCommentWriteSerializer(serializers.ModelSerializer):
     class Meta:
@@ -21,21 +21,25 @@ class EmployerCommentWriteSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         application = self.context['job_application']
+        user = self.context['request'].user
+
+        if application.job_post.employer_profile != user.employer_profile:
+            raise serializers.ValidationError({'detail' : "Bạn không có quyền đánh giá đơn ứng tuyển của người khác."})
         if EmployerComment.objects.filter(job_application=application).exists():
-            raise serializers.ValidationError("Đã có đánh giá cho đơn này.")
+            raise serializers.ValidationError({'detail':'Đã có đánh giá cho đơn này.'})
 
         if application.result not in [ApplicationResult.ACCEPTED, ApplicationResult.REJECTED]:
-            raise serializers.ValidationError("Chỉ được phép đánh giá khi đơn đã có kết quả (Accepted/Rejected).")
+            raise serializers.ValidationError({'detail':"Chỉ được phép đánh giá khi đơn đã có kết quả (Accepted/Rejected)."})
 
         return attrs
 
 class CandidateReceivedCommentSerializer(serializers.ModelSerializer):
     job_post = MiniJobPostSerializer(read_only=True, source='job_application.job_post')
-    user = MiniUserSerializer(read_only=True, source='comment_author.user')
+    author = MiniUserSerializer(read_only=True, source='comment_author.user')
 
     class Meta:
         model = EmployerComment
-        fields = ['id','review', 'recommendation_rate', 'created_date', 'user', 'job_post']
+        fields = ['id','review', 'recommendation_rate', 'created_date', 'author', 'job_post']
 
 
 
@@ -46,11 +50,16 @@ class CandidateCommentWriteSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         application = self.context['job_application']
+        user = self.context['request'].user
+
+        if application.resume.candidate_profile != user.candidate_profile:
+            raise serializers.ValidationError({'detail' : "Bạn không có quyền đánh giá đơn ứng tuyển của người khác."})
+
         if CandidateComment.objects.filter(job_application=application).exists():
-            raise serializers.ValidationError("Đã có đánh giá cho đơn này.")
+            raise serializers.ValidationError({'detail':'Đã có đánh giá cho đơn này.'})
 
         if application.result not in [ApplicationResult.ACCEPTED, ApplicationResult.REJECTED]:
-            raise serializers.ValidationError("Chỉ được phép đánh giá khi đơn đã có kết quả (Accepted/Rejected).")
+            raise serializers.ValidationError({'detail':"Chỉ được phép đánh giá khi đơn đã có kết quả (Accepted/Rejected)."})
         return attrs
 
 
@@ -65,8 +74,15 @@ class FollowerListSerializer(serializers.ModelSerializer):
 class FollowingListSerializer(serializers.ModelSerializer):
     user = MiniUserSerializer(read_only=True, source='followed.user')
     followed = MiniEmployerSerializer(read_only=True)
-
+    you_followed = serializers.SerializerMethodField()
     class Meta:
         model = Follow
-        fields = ['id','user','followed', 'created_date']
+        fields = ['id', 'user', 'followed', 'you_followed', 'created_date']
+
+    def get_you_followed(self,obj):
+        request = self.context.get('request')
+        if not hasattr(request.user, 'candidate_profile'):
+            return False
+        followed_employer_ids = self.context.get('followed_employer_ids', [])
+        return obj.followed_id in followed_employer_ids
 

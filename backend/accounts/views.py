@@ -3,21 +3,25 @@ import requests
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, generics, status, permissions, filters, mixins
+from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from accounts.models import User, UserRole, EmployerProfile, CandidateProfile, Province, District, Ward
+from accounts.models import User, UserRole, EmployerProfile, CandidateProfile, Province, District, Ward, \
+    VerificationRequest, VerificationStatus
 from accounts import serializers
 from accounts.perms import IsCandidate, IsEmployer, IsBasicUser
 from accounts.serializers import UpdateEmployerProfileSerializer, UpdateCandidateProfileSerializer, \
     PublicEmployerProfileSerializer, PublicCandidateProfileSerializer, ProvinceSerializer, DistrictSerializer, \
-    WardSerializer
+    WardSerializer, CreateVerificationRequestSerializer, RetrieveVerificationRequestSerializer, \
+    ListVerificationRequestSerializer, MiniUserSerializer
 from applications.filters import ResumeListFilter
 from applications.models import Resume, ResumeStatus, JobApplication
 from applications.serializers import SimpleResumeSerializer, ListApplicationSerializer, \
     CandidateJobApplicationListSerializer
+from core import paginators
 
 from core.paginators import BasePaginator
 from core.settings import env
@@ -96,9 +100,9 @@ class PublicCandidateProfileViewSet(mixins.RetrieveModelMixin,viewsets.GenericVi
                     filter(status = ResumeStatus.PUBLIC)).order_by('-updated_date')
         page = self.paginate_queryset(queryset)
         if page is not None:
-            serializer = SimpleResumeSerializer(page,many=True)
+            serializer = SimpleResumeSerializer(page,many=True,context=self.get_serializer_context())
             return self.get_paginated_response(serializer.data)
-        serializer = SimpleResumeSerializer(queryset, many=True)
+        serializer = SimpleResumeSerializer(queryset, many=True,context=self.get_serializer_context())
         return Response(serializer.data)
 
     @action(methods=['get'], detail=True, url_path='comments')
@@ -115,10 +119,10 @@ class PublicCandidateProfileViewSet(mixins.RetrieveModelMixin,viewsets.GenericVi
 
         page = self.paginate_queryset(queryset)
         if page is not None:
-            serializer = EmployerReceivedCommentSerializer(page, many=True)
+            serializer = EmployerReceivedCommentSerializer(page, many=True,context=self.get_serializer_context())
             return self.get_paginated_response(serializer.data)
 
-        serializer = CandidateReceivedCommentSerializer(page, many=True)
+        serializer = CandidateReceivedCommentSerializer(page, many=True,context=self.get_serializer_context())
         return Response(serializer.data)
 
     @action(methods=['get'], detail=True, url_path='following')
@@ -133,12 +137,19 @@ class PublicCandidateProfileViewSet(mixins.RetrieveModelMixin,viewsets.GenericVi
             'followed__user'
         ).order_by('-created_date')
 
+        context = self.get_serializer_context()
+        if hasattr(request.user,'candidate_profile'):
+            context['followed_employer_ids'] = set(Follow.objects.filter(follower = request.user.candidate_profile)
+                                                   .values_list('followed_id',flat=True))
+        else:
+            context['followed_employer_ids'] = set()
+
         page = self.paginate_queryset(queryset)
         if page is not None:
-            serializer = FollowingListSerializer(page, many=True, )
+            serializer = FollowingListSerializer(page, many=True,context=context )
             return self.get_paginated_response(serializer.data)
 
-        serializer = FollowingListSerializer(queryset, many=True, )
+        serializer = FollowingListSerializer(queryset, many=True,context=context )
         return Response(serializer.data)
 
 # employer
@@ -163,7 +174,7 @@ class ListEmployerMeJobPostView(generics.ListAPIView):
     ordering = ['-updated_date']
 
     def get_queryset(self):
-        qs = (JobPost.objects.filter(candidate_profile=self.request.user.candidate_profile
+        qs = (JobPost.objects.filter(employer_profile=self.request.user.employer_profile
                                      ).select_related(
             'employer_profile', 'address',
             'address__ward', 'address__ward__district', 'address__ward__district__province'
@@ -172,8 +183,6 @@ class ListEmployerMeJobPostView(generics.ListAPIView):
             application_count=Count('job_applications')
         ))
         return qs
-
-
 
 class PublicEmployerProfileViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     serializer_class = PublicEmployerProfileSerializer
@@ -277,10 +286,15 @@ class PublicEmployerProfileViewSet(mixins.RetrieveModelMixin, viewsets.GenericVi
 
 
 # user
-class CurrentUserViewSet(viewsets.ViewSet):
+class UserViewSet(mixins.ListModelMixin,viewsets.GenericViewSet):
     permission_classes = [permissions.IsAuthenticated]
-
-    @action(detail=False, methods=["get", "patch"], url_path="me")
+    serializer_class = MiniUserSerializer
+    filter_backends = [filters.SearchFilter]
+    pagination_class = paginators.UserPaginator
+    search_fields = ['username']
+    def get_queryset(self):
+        return User.objects.exclude(pk=self.request.user.pk).filter(role__in = [UserRole.EMPLOYER,UserRole.CANDIDATE])
+    @action(detail=False, methods=["get", "patch"], url_path="me",serializer_class = serializers.CurrentUserSerializer)
     def current_user(self, request):
         user = request.user
         if request.method == "GET":
@@ -291,7 +305,7 @@ class CurrentUserViewSet(viewsets.ViewSet):
             elif role == UserRole.EMPLOYER:
                 user_profile = User.objects.select_related('employer_profile').prefetch_related(
                     'employer_profile__addresses',
-                    'employer_profile__verification_images'
+                    'employer_profile__verification_requests'
                 ).get(pk=user_id)
             else:
                 user_profile = request.user
@@ -303,9 +317,69 @@ class CurrentUserViewSet(viewsets.ViewSet):
             current_user_serializer.is_valid(raise_exception=True)
             current_user_serializer.save()
             return Response(current_user_serializer.data, status=status.HTTP_200_OK)
-        else:
-            print("something went wrong !!")
 
+#addresses
+class ProvinceViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+    queryset = Province.objects.all().order_by('name')
+    serializer_class = ProvinceSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    @action(detail=True, methods=['get'], url_path='districts')
+    def get_districts(self, request, pk=None):
+        province = self.get_object()
+        districts = District.objects.filter(province=province).order_by('name')
+        serializer = DistrictSerializer(districts, many=True)
+        return Response(serializer.data)
+
+
+class DistrictViewSet( viewsets.GenericViewSet):
+
+    queryset = District.objects.all().order_by('name')
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = DistrictSerializer
+    @action(detail=True, methods=['get'], url_path='wards')
+    def get_wards(self, request, pk=None):
+
+        district = self.get_object()
+        wards = Ward.objects.filter(district=district).order_by('name')
+
+        serializer = WardSerializer(wards, many=True)
+        return Response(serializer.data)
+
+#verification
+
+class VerificationRequestViewSet(mixins.CreateModelMixin,
+                                 mixins.ListModelMixin,
+                                 mixins.RetrieveModelMixin,
+                                 mixins.DestroyModelMixin,
+                                 viewsets.GenericViewSet):
+
+    permission_classes = [IsEmployer]
+    lookup_field = 'uuid'
+
+    def get_queryset(self):
+        qs = VerificationRequest.objects.filter(
+            employer_profile=self.request.user.employer_profile
+        ).order_by('-created_date')
+        if self.action == 'retrieve':
+            return qs.prefetch_related('images')
+        return qs
+
+    def get_serializer_class(self):
+
+        if self.action == 'create':
+            return CreateVerificationRequestSerializer
+        elif self.action == 'list':
+            return ListVerificationRequestSerializer
+        else:
+            return RetrieveVerificationRequestSerializer
+
+
+    def perform_destroy(self, instance):
+
+        if instance.status != VerificationStatus.PENDING:
+            raise ValidationError({"detail": "Chỉ có thể hủy yêu cầu đang trong trạng thái chờ duyệt (PENDING)."})
+        instance.delete()
 
 # auth
 class SignUpView(generics.CreateAPIView):
@@ -408,31 +482,3 @@ class RefreshTokenView(APIView):
         except requests.exceptions.RequestException as e:
             return Response({"detail": "connection error"},
                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-#addresses
-class ProvinceViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
-    queryset = Province.objects.all().order_by('name')
-    serializer_class = ProvinceSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-    @action(detail=True, methods=['get'], url_path='districts')
-    def get_districts(self, request, pk=None):
-        province = self.get_object()
-        districts = District.objects.filter(province=province).order_by('name')
-        serializer = DistrictSerializer(districts, many=True)
-        return Response(serializer.data)
-
-
-class DistrictViewSet( viewsets.GenericViewSet):
-
-    queryset = District.objects.all().order_by('name')
-    permission_classes = [permissions.IsAuthenticated]
-
-    @action(detail=True, methods=['get'], url_path='wards')
-    def get_wards(self, request, pk=None):
-
-        district = self.get_object()
-        wards = Ward.objects.filter(district=district).order_by('name')
-
-        serializer = WardSerializer(wards, many=True)
-        return Response(serializer.data)
-

@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import { FONTSIZE,FONTWEIGHT,COLORS,SPACING,RADIUS } from "./theme";
+import { FONTSIZE, FONTWEIGHT, COLORS, SPACING, RADIUS } from "./theme";
 
 export const globalStyles = StyleSheet.create({
     debug: {
@@ -65,10 +65,10 @@ export const globalStyles = StyleSheet.create({
     },
 
     chipContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginTop: SPACING.md,
-    gap: 8, 
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        marginTop: SPACING.md,
+        gap: 8,
     },
 
     chip: {
@@ -81,39 +81,62 @@ export const globalStyles = StyleSheet.create({
     },
 
     chipText: {
-    fontSize: FONTSIZE.xs,
-    color: COLORS.textPrimary,
-    fontWeight: FONTWEIGHT.medium,
+        fontSize: FONTSIZE.xs,
+        color: COLORS.textPrimary,
+        fontWeight: FONTWEIGHT.medium,
     },
-    
-    statusBadgeContainer: {
-        backgroundColor: '#4ADE80', 
+
+    statusOpenBadgeContainer: {
+        backgroundColor: '#4ADE80',
         paddingHorizontal: 12,
         paddingVertical: 6,
-        borderRadius: RADIUS.full, 
+        borderRadius: RADIUS.full,
 
         position: 'absolute',
         top: SPACING.md,
         right: SPACING.md,
-        zIndex: 1, 
+        zIndex: 1,
     },
     statusBadgeText: {
         fontSize: FONTSIZE.xs,
-        color: COLORS.background, 
+        color: COLORS.background,
         fontWeight: FONTWEIGHT.bold,
         textTransform: 'uppercase',
         letterSpacing: 0.5,
+    },
+    statusClosedBadgeContainer: {
+        backgroundColor: '#de4a4a',
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: RADIUS.full,
+
+        position: 'absolute',
+        top: SPACING.md,
+        right: SPACING.md,
+        zIndex: 1,
+    },
+
+    statusDraftBadgeContainer: {
+        backgroundColor: '#de9e4a',
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: RADIUS.full,
+
+        position: 'absolute',
+        top: SPACING.md,
+        right: SPACING.md,
+        zIndex: 1,
     },
 
 
     footerStatItem: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 6, 
+        gap: 6,
     },
     footerStatText: {
         fontSize: FONTSIZE.xs,
-        color: COLORS.textSecondary, 
+        color: COLORS.textSecondary,
         fontWeight: FONTWEIGHT.medium,
     },
 })

@@ -83,8 +83,6 @@ class EmployerProfile(models.Model):
                     raise ValidationError({"null field":"Employer must have a company name and tax_code"})
                 if self.addresses.count() < 1:
                     raise ValidationError({"company_address":"Employer must have at least 1 address to be verified."})
-                if self.verification_images.count() < 3:
-                    raise ValidationError({"verification_image":"Employer must have at least 3 verification images to be verified."})
 
     def __str__(self):
         return self.user.username
@@ -125,6 +123,7 @@ class CompanyAddress(BaseModel):
         return self.full_address
 
 class VerificationRequest(BaseModel):
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True, db_index=True)
     employer_profile = models.ForeignKey(
         EmployerProfile, on_delete=models.CASCADE, related_name='verification_requests'
     )

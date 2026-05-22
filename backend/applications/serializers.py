@@ -12,7 +12,7 @@ from jobs.serializers import SimpleJobPostSerializer, CareerFieldSerializer
 class SimpleResumeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Resume
-        fields = ['title','updated_date','uuid']
+        fields = ['title','updated_date','status','uuid']
 
 class DetailResumeSerializer(shared.CloudinaryImageMixin,SimpleResumeSerializer):
     cloudinary_fields = ['resume_img']

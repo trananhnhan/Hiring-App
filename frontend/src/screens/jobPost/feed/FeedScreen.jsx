@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, FlatList, Image, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { useRoute, useNavigation } from '@react-navigation/native';
 import { globalStyles } from '../../../constants/globalStyles';
 import { AppScreenWrapper } from '../../../components/AppScreenWrapper';
 import { SPACING, COLORS } from '../../../constants/theme';
@@ -12,16 +13,32 @@ import { JobStatFooter } from '../../../components/JobStatFooter';
 import { AppInput } from '../../../components/AppInput';
 import { FilterModal } from '../../../components/FilterModal';
 import { TextInput } from 'react-native-paper';
+import JobDetailScreen from '../detail/JobDetailScreen';
 // Component JobCard
 const JobCard = ({ item }) => {
+  const navigation = useNavigation()
   return (
     // Dùng globalStyles.card cũ, cần thêm {position: 'relative'} để Badge top-right hoạt động
-    <TouchableOpacity style={[globalStyles.card, { position: 'relative' }]} activeOpacity={0.8}>
+    <TouchableOpacity 
+    style={[globalStyles.card, { position: 'relative' }]} 
+    activeOpacity={0.8}
+    onPress={() => navigation.navigate('JobDetail', { jobUuid: item.uuid })}
+    >
 
       {/* 1. STATUS BADGE (Top-Right) - Dùng style mới từ globalStyles */}
       {item.status === 'OPEN' && (
-        <View style={globalStyles.statusBadgeContainer}>
+        <View style={globalStyles.statusOpenBadgeContainer}>
           <Text style={globalStyles.statusBadgeText}>OPEN</Text>
+        </View>
+      )}
+      {item.status === 'CLOSED' && (
+        <View style={globalStyles.statusClosedBadgeContainer}>
+          <Text style={globalStyles.statusBadgeText}>CLOSED</Text>
+        </View>
+      )}
+      {item.status === 'DRAFT' && (
+        <View style={globalStyles.statusDraftBadgeContainer}>
+          <Text style={globalStyles.statusBadgeText}>DRAFT</Text>
         </View>
       )}
 
@@ -78,9 +95,12 @@ const JobCard = ({ item }) => {
 
 
 export default function FeedScreen() {
+  const route = useRoute(); 
+  const { feedType } = route.params || { feedType: 'global' };
+
   const [jobs, setJobs] = useState([]);
   const [page, setPage] = useState(1);
-  const [hasNext, setHasNext] = useState(true);
+  const [hasNext, setHasNext] = useState(false);
   const [error, setError] = useState(null);
 
  
@@ -97,7 +117,13 @@ export default function FeedScreen() {
 
   const fetchJobs = async (pageNumber = 1, type = 'init', searchKeyword = '', filterParams = {}) => {
     try {
-      if (type === 'init') setIsFirstLoading(true);
+      if (type === 'init'){
+        if (jobs.length === 0){
+         setIsFirstLoading(true);
+        } else{
+          setIsRefreshing(true);
+        }
+      }
       if (type === 'refresh') setIsRefreshing(true);
       if (type === 'loadMore') setIsLoadingMore(true);
       setError(null);
@@ -108,7 +134,15 @@ export default function FeedScreen() {
       };
       
       delete apiParams.parent_career_id;
-      const response = await jobServices.getGlobalJobPosts(pageNumber, apiParams);
+      const getApiMethod = (type) => {
+        switch (type) {
+          case 'followed': return jobServices.getFollowedJobPosts;
+          case 'my_jobs': return jobServices.getEmployerJobPosts;
+          default: return jobServices.getGlobalJobPosts;
+        }
+      };
+      const apiMethod = getApiMethod(feedType);
+      const response = await apiMethod(pageNumber, apiParams);
 
       if (pageNumber === 1) {
         setJobs(response.results);
@@ -128,7 +162,7 @@ export default function FeedScreen() {
     }
   };
 
-  // --- LOGIC DEBOUNCE TÌM KIẾM ---
+
   useEffect(() => {
     // 1. Lần đầu vào app -> Gọi API luôn không cần chờ
     if (!isMounted.current) {
@@ -143,13 +177,13 @@ export default function FeedScreen() {
     }, 500);
 
     return () => clearTimeout(timeoutId);
-  }, [searchInput, activeFilters]); 
+  }, [searchInput]); 
 
 
 
   const handleRefresh = () => fetchJobs(1, 'refresh', searchInput, activeFilters);
   const handleLoadMore = () => {
-    if (hasNext && !isLoadingMore && !isFirstLoading) {
+    if (hasNext && !isLoadingMore && !isFirstLoading && jobs.length > 0) {
       fetchJobs(page + 1, 'loadMore', searchInput, activeFilters);
     }
   };
@@ -217,7 +251,6 @@ export default function FeedScreen() {
         currentFilters={activeFilters}
         onApply={(newFilters) => {
           setActiveFilters(newFilters);
-          // Gọi API lại ngay lập tức với bộ lọc mới (reset về trang 1)
           fetchJobs(1, 'init', searchInput, newFilters);
         }}
       />

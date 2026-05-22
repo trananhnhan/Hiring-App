@@ -8,6 +8,7 @@ import { AuthNavigator } from './AuthNavigator';
 import { COLORS } from '../constants/theme';
 import MainBottomTabs from './MainBottomTabs';
 import { GlobalDataProvider } from '../context/GlobalDataContext';
+import  MainStackNavigator  from './MainStackNavigator';
 
 export const AppNavigator = () => {
   const { user, isLoading } = useContext(AuthContext);
@@ -25,7 +26,7 @@ export const AppNavigator = () => {
 <NavigationContainer>
       {user ? (
         <GlobalDataProvider>
-          <MainBottomTabs />
+          <MainStackNavigator/>
         </GlobalDataProvider>
       ) : (
         <AuthNavigator />

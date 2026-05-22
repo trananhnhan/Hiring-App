@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, View, Text, TouchableOpacity, ScrollView, ActivityIndicator, StyleSheet } from 'react-native';
+import { Modal, View, Text, TouchableOpacity, ScrollView, ActivityIndicator, StyleSheet, Keyboard } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppInput } from './AppInput';
 import { useGlobalData } from '../context/GlobalDataContext';
@@ -9,19 +9,13 @@ import { AppDropdown } from './AppDropdown';
 
 export const FilterModal = ({ visible, onClose, onApply, currentFilters }) => {
   const { provinces, careerFields } = useGlobalData();
-
-
   const [tempFilters, setTempFilters] = useState({});
-
-
   const [districts, setDistricts] = useState([]);
   const [wards, setWards] = useState([]);
-
-
   const [isDistrictLoading, setIsDistrictLoading] = useState(false);
   const [isWardLoading, setIsWardLoading] = useState(false);
 
-
+  // Lấy dữ liệu Quận/Huyện
   const fetchDistricts = async (provinceId) => {
     try {
       setIsDistrictLoading(true);
@@ -34,6 +28,7 @@ export const FilterModal = ({ visible, onClose, onApply, currentFilters }) => {
     }
   };
 
+  // Lấy dữ liệu Phường/Xã
   const fetchWards = async (districtId) => {
     try {
       setIsWardLoading(true);
@@ -46,44 +41,27 @@ export const FilterModal = ({ visible, onClose, onApply, currentFilters }) => {
     }
   };
 
-  // Khi người dùng thay đổi Tỉnh/Thành
   const handleProvinceChange = (provinceId) => {
-    setTempFilters(prev => ({
-      ...prev,
-      province: provinceId,
-      district: null,
-      ward: null
-    }));
+    setTempFilters(prev => ({ ...prev, province: provinceId, district: null, ward: null }));
     setDistricts([]);
     setWards([]);
     if (provinceId) fetchDistricts(provinceId);
   };
 
-  // Khi người dùng thay đổi Quận/Huyện
   const handleDistrictChange = (districtId) => {
     setTempFilters(prev => ({ ...prev, district: districtId, ward: null }));
     setWards([]);
     if (districtId) fetchWards(districtId);
   };
 
-
-
   const parentCareers = careerFields;
-
-  // Tìm đối tượng ngành cha đang được chọn để lấy mảng con bên trong nó
   const selectedParentObj = careerFields.find(item => item.id === tempFilters.parent_career_id);
-
   const childCareers = selectedParentObj ? selectedParentObj.children : [];
 
   const handleParentCareerChange = (parentFieldId) => {
-    setTempFilters(prev => ({
-      ...prev,
-      parent_career_id: parentFieldId,
-      career_field: null 
-    }));
+    setTempFilters(prev => ({ ...prev, parent_career_id: parentFieldId, career_field: null }));
   };
 
-  // Đồng bộ dữ liệu mỗi khi mở Modal
   useEffect(() => {
     if (visible) {
       setTempFilters(currentFilters || {});
@@ -95,35 +73,53 @@ export const FilterModal = ({ visible, onClose, onApply, currentFilters }) => {
   const handleApply = () => {
 
     const finalFilters = { ...tempFilters };
-
     if (!finalFilters.career_field && finalFilters.parent_career_id) {
       finalFilters.career_field = finalFilters.parent_career_id;
     }
 
-    onApply(finalFilters);
+
+    Keyboard.dismiss(); 
+
+    // Bước 2: Đợi bàn phím hạ xuống xong (khoảng 150ms) rồi mới đóng Modal
+    setTimeout(() => {
+      onClose(); 
+
+      // Bước 3: Đợi Modal trượt xuống xong hoàn toàn (khoảng 250ms) rồi mới đẩy data ra gọi API
+      setTimeout(() => {
+        onApply(finalFilters);
+      }, 250);
+
+    }, 150);
+  };
+
+  const handleCloseWrapper = () => {
+    Keyboard.dismiss();
     onClose();
   };
 
   return (
-    <Modal visible={visible} animationType="slide" transparent={true} onRequestClose={onClose}>
+    <Modal visible={visible} animationType="slide" transparent={true} onRequestClose={handleCloseWrapper}>
       <View style={styles.overlay}>
         <View style={styles.bottomSheet}>
 
+          {/* Header */}
           <View style={styles.header}>
             <Text style={styles.title}>Bộ lọc nâng cao</Text>
-            <TouchableOpacity onPress={onClose}><Ionicons name="close" size={24} /></TouchableOpacity>
+            <TouchableOpacity onPress={handleCloseWrapper}>
+              <Ionicons name="close" size={24} color={COLORS.textPrimary} />
+            </TouchableOpacity>
           </View>
 
           <ScrollView style={styles.body} showsVerticalScrollIndicator={false}>
-            {/* Lọc lương */}
+            {/* Lọc lương - Đã fix lỗi thiết lập lại */}
             <Text style={styles.sectionTitle}>Mức lương mong muốn</Text>
             <AppInput
               keyboardType="numeric"
-              value={tempFilters.expected_salary?.toString()}
+              value={tempFilters.expected_salary ? tempFilters.expected_salary.toString() : ''} 
               onChangeText={(val) => setTempFilters(prev => ({ ...prev, expected_salary: val }))}
             />
 
-            {/* --- CỤM ĐỊA CHỈ 3 CẤP --- */}
+            {/* Tỉnh / Thành phố */}
             <Text style={styles.sectionTitle}>Tỉnh / Thành phố</Text>
             <AppDropdown
               data={provinces}
@@ -132,6 +128,7 @@ export const FilterModal = ({ visible, onClose, onApply, currentFilters }) => {
               placeholder="Chọn Tỉnh/Thành phố"
             />
 
+            {/* Quận / Huyện */}
             <Text style={styles.sectionTitle}>Quận / Huyện</Text>
             {isDistrictLoading ? (
               <ActivityIndicator size="small" color={COLORS.primary} style={{ marginVertical: 10 }} />
@@ -141,10 +138,11 @@ export const FilterModal = ({ visible, onClose, onApply, currentFilters }) => {
                 value={tempFilters.district}
                 onChange={(item) => handleDistrictChange(item.id)}
                 placeholder="Chọn Quận/Huyện"
-                disabled={!tempFilters.province} // Khóa nếu chưa chọn Tỉnh
+                disabled={!tempFilters.province}
               />
             )}
 
+            {/* Phường / Xã */}
             <Text style={styles.sectionTitle}>Phường / Xã</Text>
             {isWardLoading ? (
               <ActivityIndicator size="small" color={COLORS.primary} style={{ marginVertical: 10 }} />
@@ -154,12 +152,12 @@ export const FilterModal = ({ visible, onClose, onApply, currentFilters }) => {
                 value={tempFilters.ward}
                 onChange={(item) => setTempFilters(prev => ({ ...prev, ward: item.id }))}
                 placeholder="Chọn Phường/Xã"
-                disabled={!tempFilters.district} // Khóa nếu chưa chọn Huyện
-                dropdownPosition="top" // Thêm dòng này để ép bung lên trên!
+                disabled={!tempFilters.district}
+                dropdownPosition="top"
               />
             )}
 
-            {/* --- CỤM LĨNH VỰC CHA - CON --- */}
+            {/* Nhóm ngành chính */}
             <Text style={styles.sectionTitle}>Nhóm ngành chính</Text>
             <AppDropdown
               data={parentCareers}
@@ -167,9 +165,10 @@ export const FilterModal = ({ visible, onClose, onApply, currentFilters }) => {
               value={tempFilters.parent_career_id}
               onChange={(item) => handleParentCareerChange(item.id)}
               placeholder="Chọn Nhóm ngành chính"
-              dropdownPosition="top" // Thêm dòng này để ép bung lên trên!
+              dropdownPosition="top"
             />
 
+            {/* Chuyên ngành chi tiết */}
             <Text style={styles.sectionTitle}>Chuyên ngành chi tiết</Text>
             <AppDropdown
               data={childCareers}
@@ -177,16 +176,19 @@ export const FilterModal = ({ visible, onClose, onApply, currentFilters }) => {
               value={tempFilters.career_field}
               onChange={(item) => setTempFilters(prev => ({ ...prev, career_field: item.id }))}
               placeholder="Chọn Chuyên ngành"
-              disabled={!tempFilters.parent_career_id} // Khóa nếu chưa chọn Ngành cha
-              dropdownPosition="top" // Thêm dòng này để ép bung lên trên!
+              disabled={!tempFilters.parent_career_id}
+              dropdownPosition="top"
             />
-
           </ScrollView>
 
-          {/* Cụm nút bấm chân trang */}
+          {/* Footer */}
           <View style={styles.footer}>
-            <TouchableOpacity style={styles.resetBtn} onPress={() => setTempFilters({})}><Text style={styles.resetBtnText}>Thiết lập lại</Text></TouchableOpacity>
-            <TouchableOpacity style={styles.applyBtn} onPress={handleApply}><Text style={styles.applyBtnText}>Áp dụng</Text></TouchableOpacity>
+            <TouchableOpacity style={styles.resetBtn} onPress={() => setTempFilters({})}>
+              <Text style={styles.resetBtnText}>Thiết lập lại</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.applyBtn} onPress={handleApply}>
+              <Text style={styles.applyBtnText}>Áp dụng</Text>
+            </TouchableOpacity>
           </View>
 
         </View>
@@ -196,24 +198,20 @@ export const FilterModal = ({ visible, onClose, onApply, currentFilters }) => {
 };
 
 const styles = StyleSheet.create({
-  // 1. Lớp nền mờ đen phía sau Modal
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end', // Ép nội dung rớt xuống đáy màn hình
+    justifyContent: 'center', 
+    alignItems: 'center',     
   },
-
-  // 2. Cái bảng trắng vuốt lên (Bottom Sheet)
   bottomSheet: {
+    width: '92%',             
     backgroundColor: COLORS.background,
-    borderTopLeftRadius: RADIUS.xl, // Bo góc bự cho đẹp
-    borderTopRightRadius: RADIUS.xl,
+    borderRadius: 24,
+    overflow: 'hidden',             
     padding: SPACING.lg,
-
-    maxHeight: '90%', // Đừng cho nó cao lút cán màn hình, chừa lại 10% ở trên
+    maxHeight: '85%',         
   },
-
-  // 3. Header của Modal (Có chữ Bộ lọc và nút X)
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -221,15 +219,13 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
     paddingBottom: SPACING.sm,
     borderBottomWidth: 1,
-    borderColor: COLORS.surface, // Viền xám mờ
+    borderColor: COLORS.surface, 
   },
   title: {
     fontSize: FONTSIZE.lg,
     fontWeight: FONTWEIGHT.bold,
     color: COLORS.textPrimary,
   },
-
-  // 4. Phần thân chứa các form nhập (cho phép cuộn)
   body: {
     paddingVertical: SPACING.sm,
   },
@@ -240,19 +236,6 @@ const styles = StyleSheet.create({
     marginTop: SPACING.md,
     marginBottom: SPACING.sm,
   },
-
-  // 5. Khung Placeholder giả lập cái Dropdown (khi bạn ráp UI Dropdown thật vào thì bỏ cái này đi)
-  placeholderBox: {
-    height: 50,
-    backgroundColor: COLORS.surface,
-    borderRadius: RADIUS.md,
-    justifyContent: 'center',
-    paddingHorizontal: SPACING.md,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-  },
-
-  // 6. Cụm nút bấm dưới cùng (Chân trang)
   footer: {
     flexDirection: 'row',
     gap: SPACING.md,
@@ -261,30 +244,26 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderColor: COLORS.surface,
   },
-
-  // Nút Thiết lập lại (Reset - Màu Xám Trắng)
   resetBtn: {
     flex: 1,
     backgroundColor: COLORS.surface,
     paddingVertical: 14,
-    borderRadius: RADIUS.full, // Bo tròn dạng viên thuốc
+    borderRadius: RADIUS.full || 99, 
     alignItems: 'center',
   },
   resetBtnText: {
     color: COLORS.textPrimary,
     fontWeight: FONTWEIGHT.bold,
   },
-
-  // Nút Áp dụng (Apply - Màu Đen Tuyệt đối)
   applyBtn: {
-    flex: 2, // Làm nút Apply bự gấp đôi nút Reset cho dễ bấm
+    flex: 2, 
     backgroundColor: COLORS.textPrimary,
     paddingVertical: 14,
-    borderRadius: RADIUS.full,
+    borderRadius: RADIUS.full || 99,
     alignItems: 'center',
   },
   applyBtnText: {
-    color: COLORS.background, // Chữ trắng
+    color: COLORS.background, 
     fontWeight: FONTWEIGHT.bold,
   },
 });

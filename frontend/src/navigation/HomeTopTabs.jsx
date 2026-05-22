@@ -3,7 +3,7 @@ import { createMaterialTopTabNavigator } from '@react-navigation/material-top-ta
 import { View, Text } from 'react-native';
 import { AuthContext } from '../context/AuthContext'; 
 import { COLORS, FONTWEIGHT } from '../constants/theme';
-import FeedScreen from '../screens/jobPost/feed/feed'; 
+import FeedScreen from '../screens/jobPost/feed/FeedScreen'; 
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 
@@ -44,19 +44,21 @@ export default function HomeTopTabs() {
       {/* TAB CON 1: Thay đổi động theo Role */}
       <TopTab.Screen 
         name="LeftFeed" 
-        component={isEmployer ? YourJobsPlaceholder : FollowingFeedPlaceholder} 
+        component={FeedScreen} 
         options={{ 
           tabBarLabel: isEmployer ? 'Tin đã đăng' : 'Followed' 
         }} 
+        initialParams={{ feedType: isEmployer ? 'my_jobs' : 'followed' }}
       />
 
       {/* TAB CON 2: Cả 2 cùng xem chung một Feed công việc tổng thể */}
       <TopTab.Screen 
         name="RightFeed" 
-        component={FeedScreen} // Gắn cái màn hình UI "Mọi nơi" xịn xò của bạn vào đây
+        component={FeedScreen} 
         options={{ 
           tabBarLabel: isEmployer ? 'Job toàn quốc' : 'Feed' 
         }} 
+        initialParams={{ feedType: 'global' }}
       />
     </TopTab.Navigator>
   );

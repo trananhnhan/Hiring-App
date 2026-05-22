@@ -4,6 +4,7 @@ from rest_framework import serializers
 from accounts.models import CompanyAddress
 from accounts.serializers import CompanyAddressSerializer, SimpleUserSerializer, SimpleEmployerSerializer, \
     MiniEmployerSerializer, MiniCompanyAddressSerializer
+from applications.models import JobApplication
 from core.shared import CloudinaryImageMixin
 from jobs.models import WorkDay, CareerField, JobPost, JobPostStatus
 
@@ -72,6 +73,9 @@ class JobPostDetailSerializer(JobPostListSerializer):
     user = SimpleUserSerializer(source='employer_profile.user',read_only=True)
     address = CompanyAddressSerializer(read_only=True)
     work_days = WorkDaySerializer(many=True)
+    is_applied = serializers.SerializerMethodField()
+    career_fields = CareerFieldSerializer(many=True)
+    is_owner = serializers.SerializerMethodField()
     career_fields_id = serializers.PrimaryKeyRelatedField(
         queryset= CareerField.objects.all(),
         source= 'career_fields',
@@ -85,19 +89,48 @@ class JobPostDetailSerializer(JobPostListSerializer):
     )
     class Meta:
         model = JobPostListSerializer.Meta.model
-        fields = JobPostListSerializer.Meta.fields + ['description','user','career_fields_id','address_id','work_days']
+        fields = JobPostListSerializer.Meta.fields + ['description','user','career_fields_id','address_id'
+                                                      ,'is_applied','work_days','career_fields','is_owner']
+
+    def get_is_applied(self, obj):
+        request = self.context.get('request')
+        if not request.user.is_authenticated:
+            return None
+        if hasattr(request.user, 'employer_profile'):
+            return None
+
+        application = JobApplication.objects.filter(
+            job_post=obj,
+            resume__candidate_profile=request.user.candidate_profile
+        ).first()
+
+        if not application:
+            return None
+
+        return {
+            "applied": True,
+            "uuid": str(application.uuid)
+        }
+
+    def get_is_owner(self, obj):
+        request = self.context.get('request')
+        if not request.user.is_authenticated:
+            return False
+        if hasattr(request.user, 'candidate_profile'):
+            return False
+        return obj.employer_profile.user == request.user
 
     def validate(self, attrs):
         salary_min = attrs.get('salary_min')
         salary_max = attrs.get('salary_max')
         if salary_min is not None and salary_max is not None:
             if salary_min > salary_max:
-                raise serializers.ValidationError({"salary_max": "Salary max must be greater than salary min."})
+                raise serializers.ValidationError({"detail": "Salary max must be greater than salary min."})
 
         status = attrs.get('status')
         expiry_date = attrs.get('expiry_date')
         if status == JobPostStatus.OPEN and expiry_date and expiry_date <= timezone.now():
-            raise serializers.ValidationError({"expiry_date": "Expiry date must be in the future for OPEN status."})
+            raise serializers.ValidationError({"detail": "Expiry date must be in the future for OPEN status."})
 
         address = attrs.get('address')
         request = self.context.get('request')
@@ -105,7 +138,13 @@ class JobPostDetailSerializer(JobPostListSerializer):
             employer = request.user.employer_profile
             if address and employer:
                 if address.employer_id != employer.id:
-                    raise serializers.ValidationError({'address': 'Address does not belong to this employer.'})
+                    raise serializers.ValidationError({'detail': 'Address does not belong to this employer.'})
+
+        if self.instance:
+            if self.instance.status == JobPostStatus.CLOSED:
+                raise serializers.ValidationError(
+                    {'detail': "Can't change closed job post."}
+                )
 
         return attrs
 
@@ -132,5 +171,4 @@ class JobPostDetailSerializer(JobPostListSerializer):
             for work_day in work_days_data:
                 WorkDay.objects.create(job_post=instance, **work_day)
 
-        # 3. Cập nhật các field cơ bản còn lại
         return super().update(instance, validated_data)

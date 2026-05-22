@@ -5,12 +5,12 @@ import { AuthContext } from '../context/AuthContext';
 import { COLORS } from '../constants/theme';
 import HomeTopTabs from './HomeTopTabs';
 import { View, Text } from 'react-native';
-import { ProfileScreen } from '../screens/profile/ProfileScreen';
+import ProfileScreen from '../screens/profile/ProfileScreen';
+import SearchScreen from '../screens/search/SearchScreen';
 
 const BottomTab = createBottomTabNavigator();
 
 // Placeholder screens
-const SearchScreen = () => <View style={{flex:1}}><Text>Tìm kiếm</Text></View>;
 const ActionScreen = () => <View style={{flex:1}}><Text>Hành động</Text></View>;
 const ChatScreen = () => <View style={{flex:1}}><Text>Tin nhắn</Text></View>;
 
@@ -47,7 +47,7 @@ export default function MainBottomTabs() {
       <BottomTab.Screen 
         name="Action" 
         component={ActionScreen} 
-        options={{ tabBarLabel: isEmployer ? 'Đăng tin' : 'Ứng tuyển' }} 
+        options={{ tabBarLabel: isEmployer ? 'Đăng tin' : 'Đơn ứng tuyển' }} 
       />
       <BottomTab.Screen name="Chat" component={ChatScreen} options={{ tabBarLabel: 'Tin nhắn' }} />
       <BottomTab.Screen name="Profile" component={ProfileScreen} options={{ tabBarLabel: 'Tôi' }} />

@@ -1,25 +1,26 @@
-import React, { useEffect, useContext } from 'react';
+import React, { useEffect } from 'react';
 import { View, ActivityIndicator } from 'react-native';
+import { useRoute } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { AuthContext } from '../../context/AuthContext';
 import { useApi } from '../../hooks/useApi';
 import { profileServices } from '../../services/profileService';
 import { globalStyles } from '../../constants/globalStyles';
-import OwnerCandidate from './components/OwnerCandidate';
-import OwnerEmployer from './components/OwnerEmployer';
+import PublicCandidate from './components/PublicCandidate';
+import PublicEmployer from './components/PublicEmployer';
 
-export default function ProfileScreen() {
+export default function PublicProfileScreen() {
+  const route = useRoute();
   const insets = useSafeAreaInsets();
-  const { user: currentUser } = useContext(AuthContext);
-  const isCandidate = currentUser?.role === 'CANDIDATE';
+  const { username, role } = route.params || {};
+  const isCandidate = role === 'CANDIDATE';
 
-  const { data: profile, loading, execute: fetchProfile } = useApi(
+  const { data: profile, loading, execute: fetchPublicProfile } = useApi(
     isCandidate ? profileServices.getPublicCandidateProfile : profileServices.getPublicEmployerProfile
   );
 
   useEffect(() => {
-    if (currentUser?.username) fetchProfile(currentUser.username);
-  }, [currentUser?.username]);
+    if (username) fetchPublicProfile(username);
+  }, [username]);
 
   if (loading || !profile) {
     return (
@@ -30,8 +31,8 @@ export default function ProfileScreen() {
   }
 
   return isCandidate ? (
-    <OwnerCandidate profile={profile} insets={insets} />
+    <PublicCandidate profile={profile} insets={insets} />
   ) : (
-    <OwnerEmployer profile={profile} insets={insets} />
+    <PublicEmployer profile={profile} insets={insets} />
   );
 }
