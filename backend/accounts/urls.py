@@ -9,8 +9,8 @@ router.register('employer-profiles',views.PublicEmployerProfileViewSet,basename=
 router.register('candidate-profiles',views.PublicCandidateProfileViewSet,basename='public_candidate_profile')
 router.register('provinces', views.ProvinceViewSet, basename='province')
 router.register('districts', views.DistrictViewSet, basename='district')
-router.register('employer-profiles/me/verification-requests',views.VerificationRequestViewSet,basename='verification_request')
-
+router.register('verification-requests',views.VerificationRequestViewSet,basename='verification_request')
+router.register('employer-profiles/me/addresses',views.CompanyAddressViewSet,basename= 'company_addresses')
 urlpatterns = [
     path('auth/sign-up/',views.SignUpView.as_view()),
     path('auth/login/',views.LoginView.as_view()),

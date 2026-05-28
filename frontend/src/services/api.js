@@ -50,7 +50,7 @@ api.interceptors.response.use(
                 await AsyncStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
                 await AsyncStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
                 if (logout) logout();
-                return Promise.reject(refreshError);
+                return new Promise(() => {});
             }
         }
         return Promise.reject(error);

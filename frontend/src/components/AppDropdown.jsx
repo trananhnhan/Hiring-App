@@ -12,7 +12,8 @@ export const AppDropdown = ({
     valueField = 'id',
     search = true,
     disabled = false,
-    dropdownPosition = 'auto' // Mặc định là auto (tự tính toán)
+    dropdownPosition = 'auto',
+    flatListProps 
 }) => {
     return (
         <Dropdown
@@ -31,7 +32,8 @@ export const AppDropdown = ({
             value={value}
             onChange={onChange}
             disable={disabled}
-            dropdownPosition={dropdownPosition} // Gắn vào đây! (top / bottom / auto)
+            dropdownPosition={dropdownPosition} 
+            flatListProps={flatListProps}
         />
     );
 };

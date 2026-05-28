@@ -29,13 +29,15 @@ DEBUG = True
 ALLOWED_HOSTS = [
     '192.168.1.230',
     '127.0.0.1',
-    '192.168.1.222'
+    '192.168.1.222',
+    '192.168.1.234'
 ]
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    'moderation.apps.ModerationConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -47,7 +49,7 @@ INSTALLED_APPS = [
     'jobs.apps.JobsConfig',
     'applications.apps.ApplicationsConfig',
     'interactions.apps.InteractionsConfig',
-    'moderation.apps.ModerationConfig',
+
     #---library
     'rest_framework',
     'corsheaders',
@@ -57,6 +59,7 @@ INSTALLED_APPS = [
 ]
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.SessionAuthentication',
         'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
     )
 }
@@ -76,10 +79,11 @@ ROOT_URLCONF = 'core.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
@@ -134,6 +138,13 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'trananhnhan4425@gmail.com'
+EMAIL_HOST_PASSWORD = 'wzyw hiuq gqbj dgoo'
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 
 # Internationalization

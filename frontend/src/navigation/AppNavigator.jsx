@@ -4,15 +4,16 @@ import { NavigationContainer } from '@react-navigation/native';
 
 import { AuthContext } from '../context/AuthContext';
 import { AuthNavigator } from './AuthNavigator';
+import { GlobalDataProvider } from '../context/GlobalDataContext';
+import MainStackNavigator from './MainStackNavigator';
+
+// Sắp tạo cái này ở Bước 3
+import ModeratorNavigator from './ModeratorNavigator'; 
 
 import { COLORS } from '../constants/theme';
-import MainBottomTabs from './MainBottomTabs';
-import { GlobalDataProvider } from '../context/GlobalDataContext';
-import  MainStackNavigator  from './MainStackNavigator';
 
 export const AppNavigator = () => {
   const { user, isLoading } = useContext(AuthContext);
-
 
   if (isLoading) {
     return (
@@ -23,11 +24,16 @@ export const AppNavigator = () => {
   }
   
   return (
-<NavigationContainer>
+    <NavigationContainer>
       {user ? (
-        <GlobalDataProvider>
-          <MainStackNavigator/>
-        </GlobalDataProvider>
+        // ✅ NẾU LÀ MODERATOR THÌ VÀO LUỒNG RIÊNG
+        user.role === 'MODERATOR' ? (
+            <ModeratorNavigator />
+        ) : (
+            <GlobalDataProvider>
+              <MainStackNavigator/>
+            </GlobalDataProvider>
+        )
       ) : (
         <AuthNavigator />
       )}

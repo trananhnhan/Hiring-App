@@ -7,9 +7,10 @@ import { profileServices } from '../../services/profileService';
 import { globalStyles } from '../../constants/globalStyles';
 import OwnerCandidate from './components/OwnerCandidate';
 import OwnerEmployer from './components/OwnerEmployer';
-
+import { useIsFocused } from '@react-navigation/native';
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
+  const isFocused = useIsFocused();
   const { user: currentUser } = useContext(AuthContext);
   const isCandidate = currentUser?.role === 'CANDIDATE';
 
@@ -19,7 +20,7 @@ export default function ProfileScreen() {
 
   useEffect(() => {
     if (currentUser?.username) fetchProfile(currentUser.username);
-  }, [currentUser?.username]);
+  }, [currentUser?.username,isFocused]);
 
   if (loading || !profile) {
     return (
@@ -30,8 +31,8 @@ export default function ProfileScreen() {
   }
 
   return isCandidate ? (
-    <OwnerCandidate profile={profile} insets={insets} />
+    <OwnerCandidate profile={profile} insets={insets} isFocused={isFocused} />
   ) : (
-    <OwnerEmployer profile={profile} insets={insets} />
+    <OwnerEmployer profile={profile} insets={insets} isFocused={isFocused} />
   );
 }

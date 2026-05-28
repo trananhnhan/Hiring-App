@@ -2,7 +2,8 @@ from django.utils import timezone
 from rest_framework import serializers
 from core import shared
 from accounts.models import UserRole
-from accounts.serializers import MiniUserSerializer, MiniEmployerSerializer
+from accounts.serializers import MiniUserSerializer, MiniEmployerSerializer, SimpleUserSerializer, \
+    MiniUserEmployerSerializer
 from applications.models import JobApplication, Resume, ResumeStatus, ApplicationResult
 from jobs.models import JobPost, JobPostStatus, CareerField
 from jobs.serializers import SimpleJobPostSerializer, CareerFieldSerializer
@@ -18,6 +19,7 @@ class DetailResumeSerializer(shared.CloudinaryImageMixin,SimpleResumeSerializer)
     cloudinary_fields = ['resume_img']
     candidate_user = MiniUserSerializer(read_only=True,source='resume.candidate_profile.user')
     career_fields = CareerFieldSerializer(read_only=True, many=True)
+    is_owner = serializers.SerializerMethodField(read_only=True)
     career_fields_id = serializers.PrimaryKeyRelatedField(
         queryset= CareerField.objects.all(),
         source= 'career_fields',
@@ -26,7 +28,16 @@ class DetailResumeSerializer(shared.CloudinaryImageMixin,SimpleResumeSerializer)
     )
     class Meta:
         model = SimpleResumeSerializer.Meta.model
-        fields = SimpleResumeSerializer.Meta.fields + ['candidate_user','resume_img','description','status','career_fields','career_fields_id']
+        fields = SimpleResumeSerializer.Meta.fields + ['candidate_user','resume_img','description','status','career_fields','career_fields_id','is_owner']
+
+    def get_is_owner(self,obj):
+        request = self.context.get('request')
+        if not request or not request.user or not request.user.is_authenticated or not hasattr(request.user,'candidate_profile'):
+            return False
+        candidate_profile = request.user.candidate_profile
+        return obj.candidate_profile == candidate_profile
+
+
 
 class ListApplicationSerializer(serializers.ModelSerializer):
     candidate_user = MiniUserSerializer(read_only=True,source='resume.candidate_profile.user')
@@ -51,44 +62,34 @@ class SimpleApplicationSerializer(serializers.ModelSerializer):
     resume = SimpleResumeSerializer(read_only=True)
 
     class Meta:
-        fields = ['resume','created_date','message','result','result_detail']
+        fields = ['uuid','resume','created_date','updated_date','message','result','result_detail']
         model = JobApplication
 
-class DetailCandidateApplicationSerializer(serializers.ModelSerializer):
-    job_post = SimpleJobPostSerializer(read_only=True)
-    class Meta:
-        fields = ['job_post']
-        model = JobApplication
-
-class DetailEmployerApplicationSerializer(serializers.ModelSerializer):
-    candidate_user = MiniUserSerializer(source='resume.candidate.user',read_only=True)
-
-    class Meta:
-        fields = ['candidate_user']
-        model = JobApplication
 
 class RetrieveApplicationSerializer(SimpleApplicationSerializer):
-    detail = serializers.SerializerMethodField()
+    candidate = MiniUserSerializer(read_only=True,source='resume.candidate_profile.user')
+    employer = MiniUserEmployerSerializer(read_only=True,source='job_post.employer_profile.user')
+    job_post = SimpleJobPostSerializer(read_only=True)
 
     class Meta:
-        fields = SimpleApplicationSerializer.Meta.fields + ['detail']
+        fields = SimpleApplicationSerializer.Meta.fields + ['candidate','employer','job_post']
         model = SimpleApplicationSerializer.Meta.model
 
-    def get_detail(self,obj):
-        request = self.context.get('request')
-        if request.user.role == UserRole.CANDIDATE:
-            return DetailCandidateApplicationSerializer(obj).data
-        elif request.user.role == UserRole.EMPLOYER:
-            return DetailEmployerApplicationSerializer(obj).data
-        return None
 
 class UpdateCandidateApplicationSerializer(serializers.ModelSerializer):
-
+    resume = serializers.SlugRelatedField('uuid',queryset=Resume.objects.all())
     class Meta:
-        fields = ['message']
+        fields = ['message','resume']
         model = JobApplication
+
+    def validate_resume(self, value):
+        request = self.context.get('request')
+        if value.candidate_profile != request.user.candidate_profile:
+            raise serializers.ValidationError('resume không thuộc về bạn')
+        return value
+
     def validate(self, attrs):
-        if self.instance.application_result != ApplicationResult.PENDING:
+        if self.instance.result != ApplicationResult.PENDING:
             raise serializers.ValidationError({
                 'result' : 'chỉ có thể thay đổi nội dung khi kết quả đang là PENDING'
             })
@@ -108,7 +109,7 @@ class UpdateEmployerApplicationSerializer(serializers.ModelSerializer):
                 'result': 'không được thay đổi result về Pending'
             })
 
-        if not self.instance.application_result in editable_results:
+        if not self.instance.result in editable_results:
             raise serializers.ValidationError({
                 'result' : 'chỉ có thể thay đổi nội dung khi kết quả đang là Pending hoặc Reviewing'
             })

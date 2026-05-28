@@ -10,20 +10,18 @@ import ReviewCard from './ReviewCard';
 import api from '../../../services/api';
 import { styles } from '../style';
 
-export default function PublicEmployer({ profile, insets }) {
+export default function PublicEmployer({ profile, insets, isFocused }) {
   const navigation = useNavigation();
   const { user: currentUser } = useContext(AuthContext);
   const [activeTab, setActiveTab] = useState('tab1');
   const [isFollowing, setIsFollowing] = useState(profile.you_followed || false);
 
-  // --- QUẢN LÝ STATE PHÂN TRANG VÔ HẠN ---
   const [listData, setListData] = useState([]);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
 
-  // Lấy số lượng Người theo dõi ở Header Doanh nghiệp
   const [followerCount, setFollowerCount] = useState(0);
   const fetchFollowerCount = () => {
     api.get(`/employer-profiles/${profile.user?.username}/followers/`)
@@ -33,9 +31,8 @@ export default function PublicEmployer({ profile, insets }) {
 
   useEffect(() => {
     if (profile.user?.username) fetchFollowerCount();
-  }, [profile.user?.username]);
+  }, [profile.user?.username, isFocused]);
 
-  // Hàm nạp data cộng dồn trang
   const loadData = async (pageToLoad, isRefresh = false) => {
     if (pageToLoad === 1) setIsInitialLoading(true);
     else setIsLoadingMore(true);
@@ -52,7 +49,7 @@ export default function PublicEmployer({ profile, insets }) {
       setListData(prev => isRefresh ? newItems : [...prev, ...newItems]);
       setHasMore(responseData?.next !== null);
     } catch (err) {
-      console.log("Lỗi tải phân trang PublicEmployer:", err);
+      console.log("Lỗi tải phân trang:", err);
     } finally {
       setIsInitialLoading(false);
       setIsLoadingMore(false);
@@ -66,7 +63,7 @@ export default function PublicEmployer({ profile, insets }) {
       setHasMore(true);
       loadData(1, true);
     }
-  }, [activeTab, profile.user?.username]);
+  }, [activeTab, profile.user?.username, isFocused]);
 
   const handleLoadMore = () => {
     if (!isInitialLoading && !isLoadingMore && hasMore) {
@@ -80,25 +77,20 @@ export default function PublicEmployer({ profile, insets }) {
     try {
       await profileServices.followEmployer(profile.user?.username);
       setIsFollowing(!isFollowing);
-      // Bắn lệnh cập nhật lại ngay lập tức số đếm tươi mới trên UI
       setTimeout(() => fetchFollowerCount(), 200);
     } catch (err) {
-      console.log("Lỗi bấm nút follow tại trang public:", err);
+      console.log("Lỗi follow:", err);
     }
   };
 
-  const renderItemCard = ({ item, index }) => {
+  const renderItemCard = ({ item }) => {
     if (activeTab === 'tab1') return <JobCard item={item} />;
     return <ReviewCard item={item} />;
   };
 
   const renderFooterLoading = () => {
     if (!isLoadingMore) return <View style={{ height: 40 }} />;
-    return (
-      <View style={{ paddingVertical: 16, alignItems: 'center' }}>
-        <ActivityIndicator size="small" color="#111111" />
-      </View>
-    );
+    return <View style={{ paddingVertical: 16, alignItems: 'center' }}><ActivityIndicator size="small" color="#111111" /></View>;
   };
 
   return (
@@ -114,8 +106,6 @@ export default function PublicEmployer({ profile, insets }) {
           renderItem={renderItemCard}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 20 }}
-          
-          // ✅ GOM TOÀN BỘ HEADER VÀ NÚT TOGGLE FOLLOW VÀO LIST HEADER COMPONENT
           ListHeaderComponent={
             <View style={{ backgroundColor: '#FFFFFF' }}>
               <View style={[styles.headerContainer, { paddingTop: insets.top > 0 ? insets.top + 10 : 24 }]}>
@@ -128,18 +118,81 @@ export default function PublicEmployer({ profile, insets }) {
                 <Text style={styles.bioText}>{profile.company_description || 'Chưa cập nhật giới thiệu công ty.'}</Text>
                 <Text style={[styles.ageText, { fontWeight: 'bold' }]}> {profile.company_name}</Text>
                 
-                <View style={styles.statsRow}>
-                  <TouchableOpacity style={styles.statItem} onPress={() => navigation.navigate('FollowListScreen', { type: 'followers', username: profile.user?.username })}>
-                    <Text style={styles.statNumber}>{followerCount}</Text>
-                    <Text style={styles.statLabel}>Người theo dõi</Text>
-                  </TouchableOpacity>
+                {/* ✅ KHU VỰC ĐIỀU HƯỚNG HIỂN THỊ DỰA TRÊN ROLE */}
+                <View style={{ marginTop: 12, alignItems: 'center' }}>
+                  
+                  {currentUser?.role === 'CANDIDATE' && !profile.is_owner ? (
+                    // TRƯỜNG HỢP 1: Ứng viên xem Doanh nghiệp -> Đếm ở trên, 2 Nút ở dưới
+                    <>
+                      <TouchableOpacity 
+                        style={[styles.statItem, { marginBottom: 12, alignItems: 'center' }]} 
+                        onPress={() => navigation.navigate('FollowListScreen', { type: 'followers', username: profile.user?.username })}
+                      >
+                        <Text style={styles.statNumber}>{followerCount}</Text>
+                        <Text style={styles.statLabel}>Người theo dõi</Text>
+                      </TouchableOpacity>
+
+                      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        <TouchableOpacity 
+                          style={[styles.actionButton, { marginRight: 8, height: 40, paddingHorizontal: 16, borderRadius: 20, justifyContent: 'center' }, isFollowing && { backgroundColor: '#E5E7EB', borderColor: 'transparent' }]} 
+                          onPress={handleFollowToggle}
+                        >
+                          <Text style={styles.actionButtonText}>{isFollowing ? 'Đang theo dõi ✓' : 'Theo dõi +'}</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity 
+                          style={[styles.actionButton, { backgroundColor: '#EFF6FF', borderColor: '#3B82F6', borderWidth: 1, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, height: 40, borderRadius: 20 }]} 
+                          onPress={() => navigation.navigate('ChatDetailScreen', {
+                            targetUser: {
+                              username: profile.user?.username,
+                              name: `${profile.user?.name} (${profile.company_name})`,
+                              avatar: profile.user?.avatar || 'https://via.placeholder.com/150'
+                            }
+                          })}
+                        >
+                          <Ionicons name="chatbubble-ellipses-outline" size={20} color="#3B82F6" />
+                          <Text style={{ color: '#3B82F6', marginLeft: 8, fontWeight: 'bold' }}>Nhắn tin</Text>
+                        </TouchableOpacity>
+                      </View>
+                    </>
+                  ) : (
+                    // TRƯỜNG HỢP 2: Employer xem Employer, hoặc Tự xem trang cá nhân -> Cùng 1 hàng ngang - CHIA ĐÔI TÂM TUYỆT ĐỐI
+                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
+                      
+                      {/* Nửa bên trái */}
+                      <View style={{ flex: 1, alignItems: profile.is_owner ? 'center' : 'flex-end', paddingRight: profile.is_owner ? 0 : 12 }}>
+                        <TouchableOpacity 
+                          style={[styles.statItem, { alignItems: 'center', justifyContent: 'center', marginTop: 0, marginBottom: 0 }]} 
+                          onPress={() => navigation.navigate('FollowListScreen', { type: 'followers', username: profile.user?.username })}
+                        >
+                          <Text style={styles.statNumber}>{followerCount}</Text>
+                          <Text style={styles.statLabel}>Người theo dõi</Text>
+                        </TouchableOpacity>
+                      </View>
+
+                      {/* Nửa bên phải */}
+                      {!profile.is_owner && (
+                        <View style={{ flex: 1, alignItems: 'flex-start', paddingLeft: 12 }}>
+                          <TouchableOpacity 
+                            style={[styles.actionButton, { backgroundColor: '#EFF6FF', borderColor: '#3B82F6', borderWidth: 1, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, height: 40, borderRadius: 20, marginTop: 0, marginBottom: 0 }]} 
+                            onPress={() => navigation.navigate('ChatDetailScreen', {
+                              targetUser: {
+                                username: profile.user?.username,
+                                name: `${profile.user?.name} (${profile.company_name})`,
+                                avatar: profile.user?.avatar || 'https://via.placeholder.com/150'
+                              }
+                            })}
+                          >
+                            <Ionicons name="chatbubble-ellipses-outline" size={20} color="#3B82F6" />
+                            <Text style={{ color: '#3B82F6', marginLeft: 8, fontWeight: 'bold' }}>Nhắn tin</Text>
+                          </TouchableOpacity>
+                        </View>
+                      )}
+                    </View>
+                  )}
+
                 </View>
 
-                {currentUser?.role === 'CANDIDATE' && (
-                  <TouchableOpacity style={[styles.actionButton, isFollowing && { backgroundColor: '#E5E7EB', borderColor: 'transparent' }]} onPress={handleFollowToggle}>
-                    <Text style={styles.actionButtonText}>{isFollowing ? 'Đang theo dõi ✓' : 'Theo dõi +'}</Text>
-                  </TouchableOpacity>
-                )}
               </View>
 
               <View style={[styles.tabBarContainer, { marginBottom: 12 }]}>
@@ -152,10 +205,7 @@ export default function PublicEmployer({ profile, insets }) {
               </View>
             </View>
           }
-          
-          ListEmptyComponent={
-            <Text style={{ textAlign: 'center', color: '#6B7280', marginTop: 30, fontSize: 13 }}>Danh sách trống.</Text>
-          }
+          ListEmptyComponent={<Text style={{ textAlign: 'center', color: '#6B7280', marginTop: 30, fontSize: 13 }}>Danh sách trống.</Text>}
           onEndReached={handleLoadMore}
           onEndReachedThreshold={0.2}
           ListFooterComponent={renderFooterLoading}

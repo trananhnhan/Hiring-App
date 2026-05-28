@@ -9,28 +9,25 @@ import ReviewCard from './ReviewCard';
 import api from '../../../services/api';
 import { styles } from '../style';
 
-export default function PublicCandidate({ profile, insets }) {
+export default function PublicCandidate({ profile, insets, isFocused }) {
   const navigation = useNavigation();
   const [activeTab, setActiveTab] = useState('tab1');
 
-  // --- QUẢN LÝ STATE PHÂN TRANG VÔ HẠN ---
   const [listData, setListData] = useState([]);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
 
-  // Lấy số lượng Đang theo dõi công khai ở Header
   const [followingCount, setFollowingCount] = useState(0);
   useEffect(() => {
     if (profile.user?.username) {
       api.get(`/candidate-profiles/${profile.user.username}/following/`)
         .then(res => setFollowingCount(res.data?.count || 0))
-        .catch(() => {});
+        .catch(() => { });
     }
-  }, [profile.user?.username]);
+  }, [profile.user?.username, isFocused]);
 
-  // Hàm cốt lõi nạp dữ liệu phân trang cộng dồn mảng
   const loadData = async (pageToLoad, isRefresh = false) => {
     if (pageToLoad === 1) setIsInitialLoading(true);
     else setIsLoadingMore(true);
@@ -47,14 +44,13 @@ export default function PublicCandidate({ profile, insets }) {
       setListData(prev => isRefresh ? newItems : [...prev, ...newItems]);
       setHasMore(responseData?.next !== null);
     } catch (err) {
-      console.log("Lỗi tải phân trang PublicCandidate:", err);
+      console.log("Lỗi tải phân trang:", err);
     } finally {
       setIsInitialLoading(false);
       setIsLoadingMore(false);
     }
   };
 
-  // Reset khi chuyển đổi giữa Tab CV và Đánh giá
   useEffect(() => {
     if (profile.user?.username) {
       setListData([]);
@@ -62,7 +58,7 @@ export default function PublicCandidate({ profile, insets }) {
       setHasMore(true);
       loadData(1, true);
     }
-  }, [activeTab, profile.user?.username]);
+  }, [activeTab, profile.user?.username, isFocused]);
 
   const handleLoadMore = () => {
     if (!isInitialLoading && !isLoadingMore && hasMore) {
@@ -72,13 +68,15 @@ export default function PublicCandidate({ profile, insets }) {
     }
   };
 
-  const renderItemCard = ({ item, index }) => {
+  const renderItemCard = ({ item }) => {
     if (activeTab === 'tab1') {
       return (
-        <View style={styles.itemCard}>
-          <Text style={styles.itemTitle}>📄 {item.title}</Text>
-          <Text style={styles.itemSubText}>Cập nhật: {formatDate(item.updated_date)}</Text>
-        </View>
+        <TouchableOpacity onPress={() => navigation.navigate('ResumeDetailScreen', { resumeUuid: item.uuid })}>
+          <View style={styles.itemCard}>
+            <Text style={styles.itemTitle}>📄 {item.title}</Text>
+            <Text style={styles.itemSubText}>Cập nhật: {formatDate(item.updated_date)}</Text>
+          </View>
+        </TouchableOpacity>
       );
     }
     return <ReviewCard item={item} />;
@@ -86,11 +84,7 @@ export default function PublicCandidate({ profile, insets }) {
 
   const renderFooterLoading = () => {
     if (!isLoadingMore) return <View style={{ height: 40 }} />;
-    return (
-      <View style={{ paddingVertical: 16, alignItems: 'center' }}>
-        <ActivityIndicator size="small" color="#111111" />
-      </View>
-    );
+    return <View style={{ paddingVertical: 16, alignItems: 'center' }}><ActivityIndicator size="small" color="#111111" /></View>;
   };
 
   return (
@@ -106,11 +100,8 @@ export default function PublicCandidate({ profile, insets }) {
           renderItem={renderItemCard}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 20 }}
-          
-          // ✅ ĐẨY TOÀN BỘ HEADER VÀ TABBAR VÀO FLATLIST ĐỂ CUỘN ĐỒNG BỘ MƯỢT MÀ
           ListHeaderComponent={
             <View style={{ backgroundColor: '#FFFFFF' }}>
-              {/* KHỐI ĐỈNH */}
               <View style={[styles.headerContainer, { paddingTop: insets.top > 0 ? insets.top + 10 : 24 }]}>
                 <TouchableOpacity style={[styles.backButton, { top: insets.top > 0 ? insets.top : 14 }]} onPress={() => navigation.goBack()}>
                   <Ionicons name="arrow-back" size={22} color="#111111" />
@@ -120,16 +111,43 @@ export default function PublicCandidate({ profile, insets }) {
                 <Text style={styles.username}>@{profile.user?.username}</Text>
                 <Text style={styles.bioText}>{profile.bio || 'Chưa cập nhật giới thiệu.'}</Text>
                 <Text style={styles.ageText}>Khoảng {profile.approximate_age || 21} tuổi 🕵️‍♂️</Text>
-                
-                <View style={styles.statsRow}>
-                  <TouchableOpacity style={styles.statItem} onPress={() => navigation.navigate('FollowListScreen', { type: 'following', username: profile.user?.username })}>
-                    <Text style={styles.statNumber}>{followingCount}</Text>
-                    <Text style={styles.statLabel}>Đang theo dõi</Text>
-                  </TouchableOpacity>
+
+                {/* ✅ CHIA ĐÔI MÀN HÌNH ĐỂ CÂN BẰNG TÂM TUYỆT ĐỐI */}
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: 12, width: '100%' }}>
+                  
+                  {/* Nửa bên trái */}
+                  <View style={{ flex: 1, alignItems: profile.is_owner ? 'center' : 'flex-end', paddingRight: profile.is_owner ? 0 : 12 }}>
+                    <TouchableOpacity 
+                      style={[styles.statItem, { alignItems: 'center', justifyContent: 'center', marginTop: 0, marginBottom: 0 }]} 
+                      onPress={() => navigation.navigate('FollowListScreen', { type: 'following', username: profile.user?.username })}
+                    >
+                      <Text style={styles.statNumber}>{followingCount}</Text>
+                      <Text style={styles.statLabel}>Đang theo dõi</Text>
+                    </TouchableOpacity>
+                  </View>
+
+                  {/* Nửa bên phải */}
+                  {!profile.is_owner && (
+                    <View style={{ flex: 1, alignItems: 'flex-start', paddingLeft: 12 }}>
+                      <TouchableOpacity 
+                        style={[styles.actionButton, { backgroundColor: '#EFF6FF', borderColor: '#3B82F6', borderWidth: 1, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, height: 40, borderRadius: 20, marginTop: 0, marginBottom: 0 }]} 
+                        onPress={() => navigation.navigate('ChatDetailScreen', {
+                          targetUser: {
+                            username: profile.user?.username,
+                            name: profile.user?.name,
+                            avatar: profile.user?.avatar || 'https://via.placeholder.com/150'
+                          }
+                        })}
+                      >
+                        <Ionicons name="chatbubble-ellipses-outline" size={20} color="#3B82F6" />
+                        <Text style={{ color: '#3B82F6', marginLeft: 8, fontWeight: 'bold' }}>Nhắn tin</Text>
+                      </TouchableOpacity>
+                    </View>
+                  )}
                 </View>
+
               </View>
 
-              {/* THANH ĐIỀU HƯỚNG TABBAR */}
               <View style={[styles.tabBarContainer, { marginBottom: 12 }]}>
                 <TouchableOpacity style={[styles.tabItem, activeTab === 'tab1' && styles.activeTabItem]} onPress={() => setActiveTab('tab1')}>
                   <Text style={[styles.tabLabel, activeTab === 'tab1' && styles.activeTabLabel]}>Hồ sơ CV</Text>
@@ -140,10 +158,7 @@ export default function PublicCandidate({ profile, insets }) {
               </View>
             </View>
           }
-          
-          ListEmptyComponent={
-            <Text style={{ textAlign: 'center', color: '#6B7280', marginTop: 30, fontSize: 13 }}>Không có dữ liệu công khai.</Text>
-          }
+          ListEmptyComponent={<Text style={{ textAlign: 'center', color: '#6B7280', marginTop: 30, fontSize: 13 }}>Không có dữ liệu công khai.</Text>}
           onEndReached={handleLoadMore}
           onEndReachedThreshold={0.2}
           ListFooterComponent={renderFooterLoading}

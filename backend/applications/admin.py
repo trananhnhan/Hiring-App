@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-# Register your models here.
+
 from django.contrib import admin
 from .models import Resume, JobApplication
 
@@ -9,7 +9,7 @@ class ResumeAdmin(admin.ModelAdmin):
     list_display = ('title', 'candidate_profile', 'status', 'created_date', 'updated_date')
     list_filter = ('status',)
     search_fields = ('title', 'candidate_profile__user__username', 'candidate_profile__user__email')
-    # Giúp chọn nhiều CareerField dễ dàng hơn bằng 2 cột
+
     filter_horizontal = ('career_fields',)
     readonly_fields = ('uuid',)
 

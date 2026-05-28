@@ -10,13 +10,14 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from accounts.models import User, UserRole, EmployerProfile, CandidateProfile, Province, District, Ward, \
-    VerificationRequest, VerificationStatus
+    VerificationRequest, VerificationStatus, CompanyAddress, CompanyVerificationImage
 from accounts import serializers
-from accounts.perms import IsCandidate, IsEmployer, IsBasicUser
+from accounts.perms import IsCandidate, IsEmployer, IsBasicUser, IsModerator, IsEmployerOrModerator
 from accounts.serializers import UpdateEmployerProfileSerializer, UpdateCandidateProfileSerializer, \
     PublicEmployerProfileSerializer, PublicCandidateProfileSerializer, ProvinceSerializer, DistrictSerializer, \
     WardSerializer, CreateVerificationRequestSerializer, RetrieveVerificationRequestSerializer, \
-    ListVerificationRequestSerializer, MiniUserSerializer
+    ListVerificationRequestSerializer, MiniUserSerializer, CompanyAddressSerializer, \
+    UpdateVerificationRequestSerializer, CompanyVerificationImageSerializer
 from applications.filters import ResumeListFilter
 from applications.models import Resume, ResumeStatus, JobApplication
 from applications.serializers import SimpleResumeSerializer, ListApplicationSerializer, \
@@ -33,7 +34,7 @@ from jobs.models import JobPost, JobPostStatus
 from jobs.serializers import JobPostListSerializer
 
 
-# candidate
+
 class UpdateCandidateMeProfileView(generics.UpdateAPIView):
     serializer_class = UpdateCandidateProfileSerializer
     permission_classes = [IsCandidate]
@@ -152,7 +153,7 @@ class PublicCandidateProfileViewSet(mixins.RetrieveModelMixin,viewsets.GenericVi
         serializer = FollowingListSerializer(queryset, many=True,context=context )
         return Response(serializer.data)
 
-# employer
+
 class UpdateEmployerMeProfileView(generics.UpdateAPIView):
     serializer_class = UpdateEmployerProfileSerializer
     permission_classes = [IsEmployer]
@@ -160,6 +161,25 @@ class UpdateEmployerMeProfileView(generics.UpdateAPIView):
 
     def get_object(self):
         return self.request.user.employer_profile
+
+class CompanyAddressViewSet(mixins.CreateModelMixin,mixins.UpdateModelMixin ,mixins.DestroyModelMixin,viewsets.GenericViewSet):
+    http_method_names = ['post', 'patch', 'delete']
+    serializer_class = CompanyAddressSerializer
+    permission_classes = [IsEmployer]
+    lookup_field = 'uuid'
+    def get_queryset(self):
+        return CompanyAddress.objects.filter(
+            employer_profile__user=self.request.user
+        )
+
+    def get_object(self):
+        return get_object_or_404(
+            self.get_queryset(), uuid=self.kwargs['uuid']
+        )
+
+    def perform_create(self, serializer):
+        serializer.save(employer_profile=self.request.user.employer_profile)
+
 
 
 class ListEmployerMeJobPostView(generics.ListAPIView):
@@ -285,7 +305,7 @@ class PublicEmployerProfileViewSet(mixins.RetrieveModelMixin, viewsets.GenericVi
         return Response(serializer.data)
 
 
-# user
+
 class UserViewSet(mixins.ListModelMixin,viewsets.GenericViewSet):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = MiniUserSerializer
@@ -318,7 +338,7 @@ class UserViewSet(mixins.ListModelMixin,viewsets.GenericViewSet):
             current_user_serializer.save()
             return Response(current_user_serializer.data, status=status.HTTP_200_OK)
 
-#addresses
+
 class ProvinceViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     queryset = Province.objects.all().order_by('name')
     serializer_class = ProvinceSerializer
@@ -346,7 +366,7 @@ class DistrictViewSet( viewsets.GenericViewSet):
         serializer = WardSerializer(wards, many=True)
         return Response(serializer.data)
 
-#verification
+
 
 class VerificationRequestViewSet(mixins.CreateModelMixin,
                                  mixins.ListModelMixin,
@@ -354,13 +374,25 @@ class VerificationRequestViewSet(mixins.CreateModelMixin,
                                  mixins.DestroyModelMixin,
                                  viewsets.GenericViewSet):
 
-    permission_classes = [IsEmployer]
+
     lookup_field = 'uuid'
 
+    def get_permissions(self):
+        if self.action == 'verify':
+            return [IsModerator()]
+        if self.action in ['retrieve', 'list']:
+            return [IsEmployerOrModerator()]
+        return [IsEmployer()]
+
     def get_queryset(self):
-        qs = VerificationRequest.objects.filter(
-            employer_profile=self.request.user.employer_profile
-        ).order_by('-created_date')
+        user = self.request.user
+        if user.role == UserRole.MODERATOR:
+            qs = VerificationRequest.objects.all().order_by('-created_date')
+        else:
+            qs = VerificationRequest.objects.filter(
+                employer_profile=user.employer_profile
+            ).order_by('-created_date')
+
         if self.action == 'retrieve':
             return qs.prefetch_related('images')
         return qs
@@ -381,7 +413,15 @@ class VerificationRequestViewSet(mixins.CreateModelMixin,
             raise ValidationError({"detail": "Chỉ có thể hủy yêu cầu đang trong trạng thái chờ duyệt (PENDING)."})
         instance.delete()
 
-# auth
+    @action(methods=['patch'], detail=True, url_path='verify', permission_classes=[IsModerator])
+    def verify(self, request, uuid=None):
+        instance = self.get_object()
+        serializer = UpdateVerificationRequestSerializer(instance, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
+
 class SignUpView(generics.CreateAPIView):
     serializer_class = serializers.UserSerializer
     permission_classes = [AllowAny]
@@ -462,7 +502,7 @@ class LoginView(APIView):
                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class RefreshTokenView(APIView):
-    permission_classes = [AllowAny] # chưa có access token hợp lệ nên không auth được
+    permission_classes = [AllowAny]
     def post(self, request):
         refresh_token = request.data.get('refresh_token')
         if not refresh_token:

@@ -65,7 +65,7 @@ class JobPostViewSet(viewsets.ModelViewSet):
             return [IsJobPostOwner(),IsVerifiedEmployer()]
         return [IsBasicUser()]
 
-    @action(detail=True,methods=['get'],url_path='job-application')
+    @action(detail=True,methods=['get'],url_path='job-applications')
     def get_applications(self,request,uuid = None):
         job_post = self.get_object()
 

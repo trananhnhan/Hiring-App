@@ -5,7 +5,7 @@ import api from "./api"
 
 
 export const profileServices = {
-  
+
 
   getMyResumes: async (page = 1) => {
     const response = await api.get(endpoints.candidateProfile.ownerProfileResumes, { params: { page } });
@@ -55,15 +55,16 @@ export const profileServices = {
     return response.data;
   },
 
-  getFollowingList: async (username) => {
-    const response = await api.get(endpoints.candidateProfile.publicProfileFollowing(username));
-    return response.data; 
-  },
-
-  getFollowersList: async (username) => {
-    const response = await api.get(endpoints.employerProfile.publicProfileFollowers(username));
+  getFollowingList: async (username, page = 1) => {
+    const response = await api.get(endpoints.candidateProfile.publicProfileFollowing(username), { params: { page } });
     return response.data;
   },
+
+  getFollowersList: async (username, page = 1) => {
+    const response = await api.get(endpoints.employerProfile.publicProfileFollowers(username), { params: { page } });
+    return response.data;
+  },
+  
   followEmployer: async (username) => {
     const response = await api.post(endpoints.employerProfile.follow(username));
     return response.data;
@@ -71,11 +72,36 @@ export const profileServices = {
 
   searchUsers: async (searchQuery, page = 1) => {
     const response = await api.get(endpoints.users.search, {
-      params: { 
-        search: searchQuery, 
-        page: page 
+      params: {
+        search: searchQuery,
+        page: page
       }
     });
     return response.data;
   },
+
+  getMe: async () => {
+        const response = await api.get(endpoints.users.currentUser);
+        return response.data;
+    },
+
+    // 2. Cập nhật User Auth (Có gửi File Avatar nên phải dùng FormData)
+    updateUser: async (formData) => {
+        const response = await api.patch(endpoints.users.currentUser, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        return response.data;
+    },
+    
+    // 3. Cập nhật Candidate Profile (Chỉ gửi text nên dùng JSON bình thường)
+    updateCandidateProfile: async (payload) => {
+        const response = await api.patch(endpoints.candidateProfile.me, payload);
+        return response.data;
+    },
+
+    // 4. Cập nhật Employer Profile (Chỉ gửi text nên dùng JSON)
+    updateEmployerProfile: async (payload) => {
+        const response = await api.patch(endpoints.employerProfile.me, payload);
+        return response.data;
+    },
 };

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, FlatList, Image, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { useRoute, useNavigation } from '@react-navigation/native';
+import { useRoute, useNavigation, useIsFocused } from '@react-navigation/native';
 import { globalStyles } from '../../../constants/globalStyles';
 import { AppScreenWrapper } from '../../../components/AppScreenWrapper';
 import { SPACING, COLORS } from '../../../constants/theme';
@@ -97,7 +97,7 @@ const JobCard = ({ item }) => {
 export default function FeedScreen() {
   const route = useRoute(); 
   const { feedType } = route.params || { feedType: 'global' };
-
+  const isFocused = useIsFocused();
   const [jobs, setJobs] = useState([]);
   const [page, setPage] = useState(1);
   const [hasNext, setHasNext] = useState(false);
@@ -177,7 +177,7 @@ export default function FeedScreen() {
     }, 500);
 
     return () => clearTimeout(timeoutId);
-  }, [searchInput]); 
+  }, [searchInput,isFocused]); 
 
 
 

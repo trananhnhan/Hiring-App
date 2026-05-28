@@ -17,3 +17,4 @@ def handle_verification_status(sender, instance, **kwargs):
         if not instance.employer_profile.is_verified:
             instance.employer_profile.is_verified = True
             instance.employer_profile.save()
+

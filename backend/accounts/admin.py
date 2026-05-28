@@ -60,8 +60,7 @@ class CompanyAddressAdmin(admin.ModelAdmin):
     list_select_related = ('employer_profile', 'ward', 'ward__district', 'ward__district__province')
 
 
-# 1. Quên chưa đăng ký VerificationRequest nè, thêm vào để Admin còn có chỗ mà duyệt (ACCEPT/REJECT) nhé!
- # Nhớ import vào
+
 
 
 @admin.register(VerificationRequest)

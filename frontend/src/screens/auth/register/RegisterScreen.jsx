@@ -87,8 +87,8 @@ export const RegisterScreen = () => {
                     type: type,
                 });
             }
-            await authServices.registerAPI(formData);
-            const data = await authServices.loginAPI(username, password);
+            await authServices.register(formData);
+            const data = await authServices.login(username, password);
             await onLoginSuccess(data.access_token, data.refresh_token);
 
 

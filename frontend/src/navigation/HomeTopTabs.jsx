@@ -7,17 +7,6 @@ import FeedScreen from '../screens/jobPost/feed/FeedScreen';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 
-const FollowingFeedPlaceholder = () => (
-  <View style={{ flex: 1, backgroundColor: COLORS.background, justifyContent: 'center', alignItems: 'center' }}>
-    <Text style={{ color: COLORS.textSecondary }}>Danh sách Job từ các công ty đã Follow (Candidate)</Text>
-  </View>
-);
-
-const YourJobsPlaceholder = () => (
-  <View style={{ flex: 1, backgroundColor: COLORS.background, justifyContent: 'center', alignItems: 'center' }}>
-    <Text style={{ color: COLORS.textSecondary }}>Các Job Post do chính bạn tạo và còn hạn (Employer)</Text>
-  </View>
-);
 
 const TopTab = createMaterialTopTabNavigator();
 
@@ -29,9 +18,9 @@ export default function HomeTopTabs() {
   return (
     <TopTab.Navigator
       screenOptions={{
-        tabBarActiveTintColor: COLORS.primary, // Chữ đen tuyền khi chọn
-        tabBarInactiveTintColor: COLORS.textSecondary, // Chữ xám khi không chọn
-        tabBarIndicatorStyle: { backgroundColor: COLORS.primary, height: 2 }, // Thanh gạch chân mỏng tối giản
+        tabBarActiveTintColor: COLORS.primary, 
+        tabBarInactiveTintColor: COLORS.textSecondary, 
+        tabBarIndicatorStyle: { backgroundColor: COLORS.primary, height: 2 }, 
         tabBarLabelStyle: { fontWeight: FONTWEIGHT.bold, textTransform: 'none', fontSize: 15 },
         tabBarStyle: { 
             backgroundColor: COLORS.background, 

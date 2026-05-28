@@ -9,8 +9,13 @@ import { formatDate } from '../../../utils/formatter';
 import ReviewCard from './ReviewCard';
 import api from '../../../services/api';
 import { styles } from '../style';
+import ResumeDetailScreen from '../../resume/detail/ResumeDetailScreen';
+import CreateEditResumeScreen from '../../resume/createEdit/CreateEditResumeScreen';
 
-export default function OwnerCandidate({ profile, insets }) {
+
+
+
+export default function OwnerCandidate({ profile, insets, isFocused }) {
   const navigation = useNavigation();
   const [activeTab, setActiveTab] = useState('tab1');
 
@@ -27,7 +32,7 @@ export default function OwnerCandidate({ profile, insets }) {
     api.get(`/candidate-profiles/${profile.user?.username}/following/`)
       .then(res => setFollowingCount(res.data?.count || 0))
       .catch(() => {});
-  }, [profile.user?.username]);
+  }, [profile.user?.username,isFocused]);
 
   // Hàm cốt lõi chịu trách nhiệm bốc dữ liệu theo trang và nối mảng động theo từng Tab
   const loadData = async (pageToLoad, isRefresh = false) => {
@@ -63,7 +68,7 @@ export default function OwnerCandidate({ profile, insets }) {
     setPage(1);
     setHasMore(true);
     loadData(1, true);
-  }, [activeTab]);
+  }, [activeTab,isFocused]);
 
   // Nhận diện chạm đáy để tăng page và kích nạp trang tiếp theo
   const handleLoadMore = () => {
@@ -82,6 +87,7 @@ export default function OwnerCandidate({ profile, insets }) {
       if (item.status === 'DRAFT') badgeStyle = styles.badgeDraft;
       if (item.status === 'PRIVATE') badgeStyle = styles.badgePrivate;
       return (
+        <TouchableOpacity onPress={() => navigation.navigate('ResumeDetailScreen',{resumeUuid : item.uuid})}>
         <View style={styles.itemCard}>
           <Text style={styles.itemTitle}>📄 {item.title}</Text>
           <View style={styles.cardFooterRow}>
@@ -89,27 +95,41 @@ export default function OwnerCandidate({ profile, insets }) {
             <View style={[styles.badgeBase, badgeStyle]}><Text style={styles.badgeTextWhite}>{item.status}</Text></View>
           </View>
         </View>
+        </TouchableOpacity>
       );
     }
 
-    // TAB 2: DANH SÁCH ĐƠN ỨNG TUYỂN (CÓ CHỨA TRANG PHÂN KỲ)
+// TAB 2: DANH SÁCH ĐƠN ỨNG TUYỂN (CÓ CHỨA TRANG PHÂN KỲ)
     if (activeTab === 'tab2') {
-      const resultColors = { 'PENDING': '#F59E0B', 'ACCEPTED': '#10B981', 'REJECTED': '#EF4444' };
-      const resultTexts = { 'PENDING': 'Đang chờ duyệt', 'ACCEPTED': 'Đã trúng tuyển', 'REJECTED': 'Từ chối' };
+      // Bổ sung thêm trạng thái REVIEWING cho đủ bộ
+      const resultColors = { 'PENDING': '#F59E0B', 'REVIEWING': '#3B82F6', 'ACCEPTED': '#10B981', 'REJECTED': '#EF4444' };
+      const resultTexts = { 'PENDING': 'Đang chờ duyệt', 'REVIEWING': 'Đang xem xét', 'ACCEPTED': 'Đã trúng tuyển', 'REJECTED': 'Từ chối' };
 
       return (
-        <View style={styles.itemCard}>
+        // ✅ THAY <View> BẰNG <TouchableOpacity> ĐỂ BẤM ĐƯỢC TOÀN BỘ CARD
+        <TouchableOpacity 
+          style={styles.itemCard}
+          activeOpacity={0.7} // Hiệu ứng mờ nhẹ khi bấm
+          onPress={() => navigation.navigate('ApplicationDetailScreen', { applicationUuid: item.uuid })}
+        >
+          {/* NÚT BẤM BÊN TRONG: Bấm riêng vào Tên Job thì sang màn Job Detail */}
           <TouchableOpacity onPress={() => navigation.navigate('JobDetail', { jobUuid: item.job_post?.uuid })}>
             <Text style={[styles.itemTitle, { color: '#3B82F6' }]}>💼 {item.job_post?.title}</Text>
           </TouchableOpacity>
+          
           <Text style={styles.itemSubText}>🏢 {item.employer_profile?.company_name}</Text>
+          
           <View style={styles.cardFooterRow}>
             <Text style={styles.itemSubText}>📅 Nộp ngày: {formatDate(item.created_date)}</Text>
-            <View style={[globalStyles.chip, { backgroundColor: resultColors[item.result] || '#G6G6G6', borderColor: 'transparent' }]}>
-              <Text style={[globalStyles.chipText, { color: '#FFFFFF' }]}>{resultTexts[item.result] || item.result}</Text>
+            
+            <View style={[globalStyles.chip, { backgroundColor: resultColors[item.result] || '#9CA3AF', borderColor: 'transparent' }]}>
+              <Text style={[globalStyles.chipText, { color: '#FFFFFF' }]}>
+                {resultTexts[item.result] || item.result}
+              </Text>
             </View>
           </View>
-        </View>
+          
+        </TouchableOpacity>
       );
     }
 
@@ -170,7 +190,7 @@ export default function OwnerCandidate({ profile, insets }) {
             // Đẩy nút tạo CV lên đầu danh sách của Tab 1
             ListHeaderComponent={
               activeTab === 'tab1' ? (
-                <TouchableOpacity style={[styles.createCard, { marginBottom: 16 }]} onPress={() => navigation.navigate('CreateResumeForm')}>
+                <TouchableOpacity style={[styles.createCard, { marginBottom: 16 }]} onPress={() => navigation.navigate('CreateEditResumeScreen')}>
                   <Ionicons name="add-circle-outline" size={20} color="#4B5563" />
                   <Text style={styles.createCardText}>Tạo CV mới</Text>
                 </TouchableOpacity>

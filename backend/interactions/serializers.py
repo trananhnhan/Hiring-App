@@ -1,9 +1,9 @@
 from rest_framework import serializers
 
 from accounts.serializers import MiniUserSerializer, MiniEmployerSerializer
-from applications.models import ApplicationResult
+from applications.models import ApplicationResult, JobApplication
 from interactions.models import CandidateComment, EmployerComment, Follow
-from jobs.serializers import MiniJobPostSerializer
+from jobs.serializers import MiniJobPostSerializer, SimpleJobPostSerializer
 
 
 class EmployerReceivedCommentSerializer(serializers.ModelSerializer):
@@ -41,7 +41,41 @@ class CandidateReceivedCommentSerializer(serializers.ModelSerializer):
         model = EmployerComment
         fields = ['id','review', 'recommendation_rate', 'created_date', 'author', 'job_post']
 
+class MiniEmployerCommentSerializer(serializers.ModelSerializer):
+    author = MiniUserSerializer(read_only=True, source='comment_author.user')
+    class Meta:
+        model = EmployerComment
+        fields = ['id','review', 'recommendation_rate', 'created_date', 'author']
 
+class MiniCandidateCommentSerializer(serializers.ModelSerializer):
+    author = MiniUserSerializer(read_only=True, source='comment_author.user')
+    class Meta:
+        model = CandidateComment
+        fields = ['id','review', 'recommendation_rate', 'created_date', 'author']
+
+class JobApplicationReceivedCommentSerializer(serializers.ModelSerializer):
+    job_post = SimpleJobPostSerializer(read_only=True)
+    candidate_comment = MiniCandidateCommentSerializer(read_only=True)
+    employer_comment = MiniEmployerCommentSerializer(read_only=True)
+    you_commented = serializers.SerializerMethodField()
+    class Meta:
+        model = JobApplication
+        fields = ['candidate_comment','employer_comment','job_post','you_commented']
+
+    def get_you_commented(self, obj):
+        request = self.context.get('request')
+        if not request or not request.user or not request.user.is_authenticated:
+            return False
+        if hasattr(request.user, 'candidate_profile'):
+            return CandidateComment.objects.filter(
+                comment_author=request.user.candidate_profile,
+                job_application=obj
+            ).exists()
+        else:
+            return EmployerComment.objects.filter(
+                comment_author=request.user.employer_profile,
+                job_application=obj
+            ).exists()
 
 class CandidateCommentWriteSerializer(serializers.ModelSerializer):
     class Meta:

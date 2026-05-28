@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { View, ActivityIndicator } from 'react-native';
-import { useRoute } from '@react-navigation/native';
+import { useIsFocused, useRoute } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useApi } from '../../hooks/useApi';
 import { profileServices } from '../../services/profileService';
@@ -9,6 +9,7 @@ import PublicCandidate from './components/PublicCandidate';
 import PublicEmployer from './components/PublicEmployer';
 
 export default function PublicProfileScreen() {
+  const isFocused = useIsFocused();
   const route = useRoute();
   const insets = useSafeAreaInsets();
   const { username, role } = route.params || {};
@@ -20,7 +21,7 @@ export default function PublicProfileScreen() {
 
   useEffect(() => {
     if (username) fetchPublicProfile(username);
-  }, [username]);
+  }, [username,isFocused]);
 
   if (loading || !profile) {
     return (
@@ -31,8 +32,8 @@ export default function PublicProfileScreen() {
   }
 
   return isCandidate ? (
-    <PublicCandidate profile={profile} insets={insets} />
+    <PublicCandidate profile={profile} insets={insets} isFocused={isFocused} />
   ) : (
-    <PublicEmployer profile={profile} insets={insets} />
+    <PublicEmployer profile={profile} insets={insets} isFocused={isFocused} />
   );
 }

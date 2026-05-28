@@ -22,7 +22,7 @@ class WardSerializer(serializers.ModelSerializer):
         model = Ward
         fields = ['id','name']
 
-# CompanyAddress
+
 class MiniCompanyAddressSerializer(serializers.ModelSerializer):
     class Meta:
         model = CompanyAddress
@@ -41,12 +41,17 @@ class CompanyAddressSerializer(serializers.ModelSerializer):
         model = CompanyAddress
         fields = ['uuid', 'full_address', 'latitude', 'longitude','ward_id' ,'ward','district','province']
 
-# CompanyVerification
-class CompanyVerificationImageSerializer(CloudinaryImageMixin,serializers.ModelSerializer):
+
+class CompanyVerificationImageSerializer(CloudinaryImageMixin, serializers.ModelSerializer):
     cloudinary_fields = ['image']
+
     class Meta:
         model = CompanyVerificationImage
         fields = ['uuid', 'image']
+        extra_kwargs = {
+            'uuid': {'read_only': True},
+        }
+
 
 class ListVerificationRequestSerializer(serializers.ModelSerializer):
 
@@ -59,6 +64,24 @@ class RetrieveVerificationRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = VerificationRequest
         fields = ['uuid', 'status', 'created_date', 'images']
+        extra_kwargs = {
+            'uuid': {'read_only': True},
+        }
+
+class UpdateVerificationRequestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = VerificationRequest
+        fields = ['uuid', 'status']
+        extra_kwargs = {
+            'uuid': {'read_only': True},
+        }
+
+    def validate_status(self, value):
+        if value not in [VerificationStatus.ACCEPTED, VerificationStatus.REJECTED]:
+            raise serializers.ValidationError("Chỉ được phép ACCEPT hoặc REJECT.")
+        if self.instance.status != VerificationStatus.PENDING:
+            raise serializers.ValidationError("Chỉ có thể duyệt request đang PENDING.")
+        return value
 
 class CreateVerificationRequestSerializer(serializers.ModelSerializer):
     upload_images = serializers.ListField(
@@ -85,7 +108,7 @@ class CreateVerificationRequestSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({'detail':"Không thể gửi request mới khi đang pending hoặc đã được xác thực."})
         if not employer_profile.company_name.strip() :
             raise serializers.ValidationError({'detail':"Không thể gửi request mới khi công ty chưa có tên."})
-        if not employer_profile.tax_code.strip():
+        if not  employer_profile.tax_code.strip():
             raise serializers.ValidationError({'detail':"Không thể gửi request mới khi công ty chưa có mã thuế."})
 
         return attrs
@@ -95,13 +118,13 @@ class CreateVerificationRequestSerializer(serializers.ModelSerializer):
         employer_profile = self.context['request'].user.employer_profile
 
         verification_request = VerificationRequest.objects.create(employer_profile=employer_profile)
-        for image in images:
-            CompanyVerificationImage.objects.create(
-                verification_request=verification_request,
-                image=image
-            )
+
+        CompanyVerificationImage.objects.bulk_create([
+            CompanyVerificationImage(verification_request=verification_request, image=image)
+            for image in images
+        ])
         return verification_request
-#employer
+
 class MiniEmployerSerializer(serializers.ModelSerializer):
     class Meta:
         model = EmployerProfile
@@ -120,6 +143,21 @@ class SimpleEmployerSerializer(serializers.ModelSerializer):
         model = EmployerProfile
         fields = ['company_name','company_description','is_verified','addresses']
 
+class MiniUserEmployerSerializer( CloudinaryImageMixin,serializers.ModelSerializer):
+    cloudinary_fields = ['avatar']
+    name = serializers.SerializerMethodField()
+    company_name = serializers.CharField(source='employer_profile.company_name',read_only=True)
+    class Meta:
+        model = User
+        fields = ['name', 'avatar', 'username','role','company_name']
+        extra_kwargs = {
+            'username' : {'read_only' : True},
+            'role' : {'read_only' : True}
+        }
+
+    def get_name(self,obj):
+        return f"{obj.last_name} {obj.first_name}".strip()
+
 class EmployerSerializer(SimpleEmployerSerializer):
 
     verification_requests = ListVerificationRequestSerializer(read_only=True,many=True)
@@ -128,7 +166,7 @@ class EmployerSerializer(SimpleEmployerSerializer):
         fields = SimpleEmployerSerializer.Meta.fields + ['tax_code','verification_requests',]
 
 
-#candidate
+
 class SimpleCandidateSerializer(serializers.ModelSerializer):
     class Meta:
         model = CandidateProfile
@@ -144,7 +182,7 @@ class CandidateSerializer(SimpleCandidateSerializer):
         model = SimpleCandidateSerializer.Meta.model
         fields = SimpleCandidateSerializer.Meta.fields +['phone']
 
-#user
+
 class MiniUserSerializer(CloudinaryImageMixin, serializers.ModelSerializer):
     cloudinary_fields = ['avatar']
     name = serializers.SerializerMethodField()
@@ -215,7 +253,7 @@ class CurrentUserSerializer(SimpleUserSerializer):
             return CandidateSerializer(obj.candidate_profile).data
         return None
 
-#employer
+
 class PublicEmployerProfileSerializer(serializers.ModelSerializer):
     user = MiniUserSerializer(read_only=True)
     addresses = MiniCompanyAddressSerializer(read_only=True,many=True)

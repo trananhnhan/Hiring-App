@@ -15,11 +15,30 @@ class IsCandidate(permissions.IsAuthenticated):
             return False
         return request.user.role == UserRole.CANDIDATE
 
+class IsModerator(permissions.IsAuthenticated):
+    def has_permission(self, request, view):
+        if not super().has_permission(request, view):
+            return False
+        return request.user.role == UserRole.MODERATOR
+
 class IsEmployer(permissions.IsAuthenticated):
     def has_permission(self, request, view):
         if not super().has_permission(request, view):
             return False
         return request.user.role == UserRole.EMPLOYER
+
+class IsSuperUser(permissions.IsAuthenticated):
+    def has_permission(self, request, view):
+        if not super().has_permission(request, view):
+            return False
+        return request.user.role == UserRole.SUPER_USER
+
+class IsEmployerOrModerator(permissions.IsAuthenticated):
+    def has_permission(self, request, view):
+        if not super().has_permission(request, view):
+            return False
+        return request.user.role in [UserRole.EMPLOYER, UserRole.MODERATOR]
+
 
 class IsVerifiedEmployer(IsEmployer):
     def has_permission(self, request, view):

@@ -7,12 +7,9 @@ import HomeTopTabs from './HomeTopTabs';
 import { View, Text } from 'react-native';
 import ProfileScreen from '../screens/profile/ProfileScreen';
 import SearchScreen from '../screens/search/SearchScreen';
+import MessageListScreen from '../screens/chat/MessageListScreen';
 
 const BottomTab = createBottomTabNavigator();
-
-// Placeholder screens
-const ActionScreen = () => <View style={{flex:1}}><Text>Hành động</Text></View>;
-const ChatScreen = () => <View style={{flex:1}}><Text>Tin nhắn</Text></View>;
 
 
 export default function MainBottomTabs() {
@@ -44,12 +41,7 @@ export default function MainBottomTabs() {
     >
       <BottomTab.Screen name="Home" component={HomeTopTabs} options={{ tabBarLabel: 'Trang chủ' }} />
       <BottomTab.Screen name="Search" component={SearchScreen} options={{ tabBarLabel: 'Tìm kiếm' }} />
-      <BottomTab.Screen 
-        name="Action" 
-        component={ActionScreen} 
-        options={{ tabBarLabel: isEmployer ? 'Đăng tin' : 'Đơn ứng tuyển' }} 
-      />
-      <BottomTab.Screen name="Chat" component={ChatScreen} options={{ tabBarLabel: 'Tin nhắn' }} />
+      <BottomTab.Screen name="Chat" component={MessageListScreen} options={{ tabBarLabel: 'Tin nhắn' }} />
       <BottomTab.Screen name="Profile" component={ProfileScreen} options={{ tabBarLabel: 'Tôi' }} />
     </BottomTab.Navigator>
   );

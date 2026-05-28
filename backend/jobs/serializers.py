@@ -12,7 +12,7 @@ from jobs.models import WorkDay, CareerField, JobPost, JobPostStatus
 class WorkDaySerializer(serializers.ModelSerializer):
     class Meta:
         model = WorkDay
-        fields = ['id', 'day_of_week', 'work_start', 'work_end', 'break_start', 'break_end']
+        fields = [ 'id','day_of_week', 'work_start', 'work_end', 'break_start', 'break_end']
 
     def validate(self, attrs):
         if attrs['work_start'] >= attrs['work_end']:
@@ -74,7 +74,7 @@ class JobPostDetailSerializer(JobPostListSerializer):
     address = CompanyAddressSerializer(read_only=True)
     work_days = WorkDaySerializer(many=True)
     is_applied = serializers.SerializerMethodField()
-    career_fields = CareerFieldSerializer(many=True)
+    career_fields = CareerFieldSerializer(many=True,read_only=True)
     is_owner = serializers.SerializerMethodField()
     career_fields_id = serializers.PrimaryKeyRelatedField(
         queryset= CareerField.objects.all(),
@@ -82,14 +82,15 @@ class JobPostDetailSerializer(JobPostListSerializer):
         write_only= True,
         many=True
     )
-    address_id = serializers.PrimaryKeyRelatedField(
+    address_uuid = serializers.SlugRelatedField(
+        slug_field= 'uuid',
         queryset= CompanyAddress.objects.all(),
         source = 'address',
         write_only= True,
     )
     class Meta:
         model = JobPostListSerializer.Meta.model
-        fields = JobPostListSerializer.Meta.fields + ['description','user','career_fields_id','address_id'
+        fields = JobPostListSerializer.Meta.fields + ['description','user','career_fields_id','address_uuid'
                                                       ,'is_applied','work_days','career_fields','is_owner']
 
     def get_is_applied(self, obj):
@@ -137,7 +138,7 @@ class JobPostDetailSerializer(JobPostListSerializer):
         if request and hasattr(request.user, 'employer_profile'):
             employer = request.user.employer_profile
             if address and employer:
-                if address.employer_id != employer.id:
+                if address.employer_profile_id != employer.id:
                     raise serializers.ValidationError({'detail': 'Address does not belong to this employer.'})
 
         if self.instance:
@@ -158,6 +159,7 @@ class JobPostDetailSerializer(JobPostListSerializer):
             WorkDay.objects.create(job_post = job_post,**work_day)
 
         job_post.career_fields.set(career_fields_data)
+        return job_post
 
     def update(self, instance, validated_data):
         career_fields_data = validated_data.pop('career_fields', None)

@@ -1,20 +1,47 @@
 import React, { useContext } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+
 import { AuthContext } from '../../context/AuthContext';
-import { COLORS, SPACING, RADIUS, FONTSIZE, FONTWEIGHT } from '../../constants/theme';
+import { COLORS } from '../../constants/theme';
 import { globalStyles } from '../../constants/globalStyles';
+
+import { styles } from './style';
 
 export default function SettingsScreen() {
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
-  const { logout } = useContext(AuthContext);
+  const { user: currentUser, logout } = useContext(AuthContext);
+
+  // Nhận diện role để phân chia menu
+  const isEmployer = currentUser?.role === 'EMPLOYER';
+
+  // Component con dùng chung cho từng dòng chức năng (Menu Row)
+  const SettingRow = ({ icon, title, description, onPress, isLast = false }) => (
+    <TouchableOpacity 
+      style={[styles.rowContainer, isLast && styles.rowLast]} 
+      activeOpacity={0.7} 
+      onPress={onPress}
+    >
+      <View style={styles.rowLeft}>
+        <View style={styles.iconWrapper}>
+          <Ionicons name={icon} size={22} color={COLORS.textPrimary || '#111111'} />
+        </View>
+        <View style={styles.textWrapper}>
+          <Text style={styles.rowTitle}>{title}</Text>
+          {description && <Text style={styles.rowDescription}>{description}</Text>}
+        </View>
+      </View>
+      <Ionicons name="chevron-forward" size={18} color={COLORS.textSecondary || '#6B7280'} />
+    </TouchableOpacity>
+  );
 
   return (
-    <View style={[globalStyles.container, { paddingTop: insets.top > 0 ? insets.top + 10 : 24 }]}>
+    <View style={[globalStyles.container, { backgroundColor: '#F9FAFB', paddingTop: Math.max(insets.top, 24) }]}>
       
+      {/* KHỐI ĐỈNH HEADER */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
           <Ionicons name="arrow-back" size={22} color={COLORS.textPrimary || '#111111'} />
@@ -23,62 +50,60 @@ export default function SettingsScreen() {
         <View style={{ width: 24 }} />
       </View>
 
-      <View style={styles.content}>
-        <Text style={styles.sectionTitle}>Tài khoản & Bảo mật</Text>
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         
+        {/* KHỐI 1: TÀI KHOẢN CÁ NHÂN (Dùng chung cho cả 2 Role) */}
+        <Text style={styles.sectionTitle}>Tài khoản & Bảo mật</Text>
+        <View style={styles.menuGroup}>
+          <SettingRow 
+            icon="person-circle-outline" 
+            title="Thông tin cá nhân" 
+            description="Quản lý tên hiển thị, avatar, thông tin liên hệ"
+            onPress={() => navigation.navigate('EditProfileScreen')} 
+            isLast={false} // Đổi thành false vì đã có dòng thống kê ở dưới
+          />
+          
+          {/* ✅ DÒNG THỐNG KÊ PHÂN TÍCH MỚI TINH */}
+          <SettingRow 
+            icon="bar-chart-outline" 
+            title="Thống kê phân tích" 
+            description={isEmployer ? "Xem số liệu bài đăng và tổng đơn ứng tuyển" : "Xem tỷ lệ trúng tuyển và lịch sử nộp đơn"}
+            onPress={() => navigation.navigate('StatsScreen')} // Bay thẳng tới màn Stats ở folder khác
+            isLast={true} // Dòng cuối cùng của khối 1
+          />
+        </View>
+
+        {/* KHỐI 2: DOANH NGHIỆP (Chỉ hiện nếu là EMPLOYER) */}
+        {isEmployer && (
+          <>
+            <Text style={styles.sectionTitle}>Quản lý Doanh nghiệp</Text>
+            <View style={styles.menuGroup}>
+              {/* Nút truy cập vào Quản lý Cơ sở / Địa chỉ vừa tạo */}
+              <SettingRow 
+                icon="location-outline" 
+                title="Cơ sở / Văn phòng" 
+                description="Thiết lập địa chỉ các chi nhánh làm việc"
+                onPress={() => navigation.navigate('CompanyAddressesScreen')} 
+              />
+              
+              <SettingRow 
+                icon="shield-checkmark-outline" 
+                title="Xác thực công ty" 
+                description={currentUser?.profile?.is_verified ? "Đơn vị đã được xác thực" : "Gửi yêu cầu xác thực công ty"}
+                onPress={() => navigation.navigate('VerificationListScreen')} 
+                isLast={true}
+              />
+            </View>
+          </>
+        )}
+
+        {/* NÚT ĐĂNG XUẤT */}
         <TouchableOpacity style={styles.logoutButton} activeOpacity={0.8} onPress={logout}>
           <Ionicons name="log-out-outline" size={20} color="#FFFFFF" />
           <Text style={styles.logoutText}>Đăng xuất tài khoản</Text>
         </TouchableOpacity>
-      </View>
-
+        
+      </ScrollView>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: SPACING.md || 16,
-    paddingBottom: SPACING.md || 16,
-    borderBottomWidth: 1,
-    borderColor: COLORS.border || '#E5E7EB',
-  },
-  backBtn: { padding: 4 },
-  headerTitle: {
-    fontSize: FONTSIZE.md || 16,
-    fontWeight: FONTWEIGHT.bold || 'bold',
-    color: COLORS.textPrimary || '#111111',
-  },
-  content: { flex: 1, padding: SPACING.lg || 20 },
-  sectionTitle: {
-    fontSize: FONTSIZE.xs || 12,
-    fontWeight: FONTWEIGHT.bold || 'bold',
-    color: COLORS.textSecondary || '#6B7280',
-    textTransform: 'uppercase',
-    marginBottom: SPACING.md || 12,
-    letterSpacing: 0.5,
-  },
-  logoutButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    backgroundColor: COLORS.error || '#EF4444',
-    paddingVertical: 12,
-    borderRadius: RADIUS.md || 12,
-    marginTop: SPACING.sm || 8,
-    shadowColor: COLORS.error || '#EF4444',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  logoutText: {
-    color: '#FFFFFF',
-    fontSize: FONTSIZE.md || 14,
-    fontWeight: FONTWEIGHT.bold || 'bold',
-  },
-});

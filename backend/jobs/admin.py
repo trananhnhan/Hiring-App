@@ -7,7 +7,7 @@ class CareerFieldAdmin(admin.ModelAdmin):
     search_fields = ('field_name',)
     list_filter = ('parent',)
 
-# Cho phép thêm WorkDay ngay trong trang tạo JobPost
+
 class WorkDayInline(admin.TabularInline):
     model = WorkDay
     extra = 1

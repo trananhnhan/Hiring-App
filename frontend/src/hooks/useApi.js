@@ -13,6 +13,7 @@ export const useApi = (apiFunc)=>{
             setData(resData);
         }
         catch(err) {
+            console.log("🔥 Lỗi API/JS:", err);
             setError(err.response?.data || 'có lỗi xảy ra');
         }
         finally{

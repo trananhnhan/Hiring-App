@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moderator Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-100 p-8">
+
+    <div class="max-w-7xl mx-auto">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800">📊 Hệ thống Thống Kê</h1>
+            <a href="/admin/" class="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700">Quay lại Admin</a>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white p-6 rounded-lg shadow border-l-4 border-blue-500">
+                <h3 class="text-gray-500 text-sm font-semibold uppercase">Tổng Việc Làm</h3>
+                <p class="text-3xl font-bold text-gray-800" id="card-jobs">...</p>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow border-l-4 border-green-500">
+                <h3 class="text-gray-500 text-sm font-semibold uppercase">Tổng Người Dùng</h3>
+                <p class="text-3xl font-bold text-gray-800" id="card-users">...</p>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow border-l-4 border-yellow-500">
+                <h3 class="text-gray-500 text-sm font-semibold uppercase">Nhà Tuyển Dụng</h3>
+                <p class="text-3xl font-bold text-gray-800" id="card-employers">...</p>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow border-l-4 border-red-500">
+                <h3 class="text-gray-500 text-sm font-semibold uppercase">Đơn Ứng Tuyển</h3>
+                <p class="text-3xl font-bold text-gray-800" id="card-applications">...</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h3 class="text-lg font-semibold text-gray-700 mb-4">Biến động Việc làm & Người dùng mới</h3>
+                <canvas id="lineChart"></canvas>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h3 class="text-lg font-semibold text-gray-700 mb-4">Việc làm mới theo tháng</h3>
+                <canvas id="barChart"></canvas>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow md:col-span-2 w-full md:w-1/2 mx-auto">
+                <h3 class="text-lg font-semibold text-gray-700 mb-4 text-center">Tỷ lệ trạng thái Ứng tuyển</h3>
+                <canvas id="doughnutChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Helper để match 2 mảng data thời gian (Phòng trường hợp tháng có tháng không)
+            const mapDataToLabels = (labels, dataList) => {
+                const dataMap = {};
+                dataList.forEach(item => dataMap[item.month] = item.count);
+                return labels.map(label => dataMap[label] || 0);
+            };
+
+            try {
+
+                const [overviewRes, jobsRes, usersRes, appsRes] = await Promise.all([
+                    fetch('/api/moderator/stats/overview/').then(r => r.json()),
+                    fetch('/api/moderator/stats/jobs-over-time/').then(r => r.json()),
+                    fetch('/api/moderator/stats/users-over-time/').then(r => r.json()),
+                    fetch('/api/moderator/stats/applications/').then(r => r.json())
+                ]);
+
+
+                document.getElementById('card-jobs').innerText = overviewRes.total_jobs;
+                document.getElementById('card-users').innerText = overviewRes.total_users;
+                document.getElementById('card-employers').innerText = overviewRes.total_employers;
+                document.getElementById('card-applications').innerText = overviewRes.total_applications;
+
+
+                const allMonths = new Set([...jobsRes.map(j => j.month), ...usersRes.map(u => u.month)]);
+
+                const labels = Array.from(allMonths).sort((a, b) => {
+                    const [mA, yA] = a.split('/'); const [mB, yB] = b.split('/');
+                    return new Date(yA, mA - 1) - new Date(yB, mB - 1);
+                });
+
+                const jobsData = mapDataToLabels(labels, jobsRes);
+                const usersData = mapDataToLabels(labels, usersRes);
+
+
+                new Chart(document.getElementById('lineChart'), {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            { label: 'Việc làm mới', data: jobsData, borderColor: '#3b82f6', tension: 0.3 },
+                            { label: 'Người dùng mới', data: usersData, borderColor: '#10b981', tension: 0.3 }
+                        ]
+                    }
+                });
+
+
+                new Chart(document.getElementById('barChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{ label: 'Việc làm mới', data: jobsData, backgroundColor: '#3b82f6' }]
+                    }
+                });
+
+
+                const appLabels = Object.keys(appsRes);
+                const appData = Object.values(appsRes);
+                new Chart(document.getElementById('doughnutChart'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: appLabels,
+                        datasets: [{
+                            data: appData,
+                            backgroundColor: ['#f59e0b', '#10b981', '#ef4444'], // Vàng (Pending), Xanh (Accepted), Đỏ (Rejected)
+                        }]
+                    }
+                });
+
+            } catch (error) {
+                console.error("Lỗi khi tải dữ liệu thống kê:", error);
+                alert("Không thể tải dữ liệu. Bạn đã đăng nhập Admin chưa?");
+            }
+        });
+    </script>
+</body>
+</html>

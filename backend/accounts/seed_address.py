@@ -3,7 +3,7 @@ import os
 import requests
 import django
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings') # Thay 'core' bằng tên thư mục chứa file settings.py của bạn
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 django.setup()
 from accounts.models import Province,District,Ward
 
@@ -14,7 +14,7 @@ url = "https://provinces.open-api.vn/api/?depth=3"
 def get_json():
     try:
         response = requests.get(url)
-        # Kiểm tra xem API có trả về thành công (HTTP 200) không
+
         response.raise_for_status()
 
         data = response.json()

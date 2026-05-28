@@ -9,7 +9,7 @@ import ReviewCard from './ReviewCard';
 import api from '../../../services/api';
 import { styles } from '../style';
 
-export default function OwnerEmployer({ profile, insets }) {
+export default function OwnerEmployer({ profile, insets, isFocused }) {
   const navigation = useNavigation();
   const [activeTab, setActiveTab] = useState('tab1');
 
@@ -26,7 +26,7 @@ export default function OwnerEmployer({ profile, insets }) {
     api.get(`/employer-profiles/${profile.user?.username}/followers/`)
       .then(res => setFollowerCount(res.data?.count || 0))
       .catch(() => {});
-  }, [profile.user?.username]);
+  }, [profile.user?.username,isFocused]);
 
   // 2. Hàm cốt lõi chịu trách nhiệm bốc dữ liệu theo trang và nối mảng
   const loadData = async (pageToLoad, isRefresh = false) => {
@@ -62,7 +62,7 @@ export default function OwnerEmployer({ profile, insets }) {
     setPage(1);
     setHasMore(true);
     loadData(1, true);
-  }, [activeTab]);
+  }, [activeTab,isFocused]);
 
   // Hàm kích hoạt khi người dùng cuộn xuống đáy danh sách
   const handleLoadMore = () => {
@@ -94,7 +94,7 @@ export default function OwnerEmployer({ profile, insets }) {
   return (
     <View style={styles.container}>
       {/* KHỐI ĐỈNH HEADER PROFILE (Giữ nguyên giao diện chuẩn của bồ) */}
-      <View style={[styles.headerContainer, { top: insets.top -50 }]}>
+      <View style={[styles.headerContainer, { top: insets.top  }]}>
         <TouchableOpacity style={styles.settingsButton} onPress={() => navigation.navigate('SettingsScreen')}>
           <Ionicons name="settings-outline" size={22} color="#111111" />
         </TouchableOpacity>
@@ -140,7 +140,7 @@ export default function OwnerEmployer({ profile, insets }) {
             // ✅ ĐẨY NÚT TẠO MỚI LÊN ĐẦU DANH SÁCH THÔNG QUA ListHeaderComponent
             ListHeaderComponent={
               activeTab === 'tab1' ? (
-                <TouchableOpacity style={[styles.createCard, { marginBottom: 16 }]} onPress={() => navigation.navigate('CreateJobPostForm')}>
+                <TouchableOpacity style={[styles.createCard, { marginBottom: 16 }]} onPress={() => navigation.navigate('CreateEditJobPostScreen')}>
                   <Ionicons name="add-circle-outline" size={20} color="#4B5563" />
                   <Text style={styles.createCardText}>Đăng bài tuyển dụng mới</Text>
                 </TouchableOpacity>

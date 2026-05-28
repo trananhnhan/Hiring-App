@@ -3,6 +3,7 @@ import { View, Text, ScrollView, Image, TouchableOpacity, ActivityIndicator } fr
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import { useIsFocused } from '@react-navigation/native';
 
 import { AuthContext } from '../../../context/AuthContext';
 import { useApi } from '../../../hooks/useApi';
@@ -21,6 +22,7 @@ import {
 } from '../../../utils/formatter';
 
 export default function JobDetailScreen() {
+  const isFocused = useIsFocused();
   const route = useRoute();
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
@@ -30,8 +32,10 @@ export default function JobDetailScreen() {
   const { data: job, loading, error, execute: fetchJobDetail } = useApi(jobServices.getJobPostDetail);
 
   useEffect(() => {
-    if (jobUuid) fetchJobDetail(jobUuid);
-  }, [jobUuid]);
+    if (jobUuid && isFocused) { 
+      fetchJobDetail(jobUuid);
+    }
+  }, [jobUuid, isFocused]);
 
   if (loading) {
     return (
@@ -78,7 +82,7 @@ export default function JobDetailScreen() {
           <View style={styles.bottomStickyBar}>
             <TouchableOpacity 
               style={[styles.btnFullWidth, { backgroundColor: COLORS.textPrimary || '#111111' }]}
-              onPress={() => navigation.navigate('JobApplications', { jobUuid: job.uuid })}
+              onPress={() => navigation.navigate('JobApplicationsListScreen', { jobUuid: job.uuid })}
             >
               <Text style={styles.btnTextWhite}>Xem danh sách đơn ứng tuyển ({job.application_count})</Text>
             </TouchableOpacity>
@@ -87,10 +91,10 @@ export default function JobDetailScreen() {
       } else {
         return (
           <View style={styles.bottomStickyBar}>
-            <TouchableOpacity style={styles.btnWidth35} onPress={() => navigation.navigate('EditJobPost', { jobUuid: job.uuid })}>
+            <TouchableOpacity style={styles.btnWidth35} onPress={() => navigation.navigate('CreateEditJobPostScreen', { jobUuid: job.uuid })}>
               <Text style={styles.btnTextBlack}>Chỉnh sửa ✏️</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.btnWidth65} onPress={() => navigation.navigate('JobApplications', { jobUuid: job.uuid })}>
+            <TouchableOpacity style={styles.btnWidth65} onPress={() => navigation.navigate('JobApplicationsListScreen', { jobUuid: job.uuid })}>
               <Text style={styles.btnTextWhite}>Xem đơn ứng tuyển ({job.application_count})</Text>
             </TouchableOpacity>
           </View>
@@ -113,7 +117,7 @@ export default function JobDetailScreen() {
         <View style={styles.bottomStickyBar}>
           <TouchableOpacity 
             style={[styles.btnFullWidth, { backgroundColor: '#3B82F6' }]} 
-            onPress={() => navigation.navigate('ApplicationDetail', { appUuid: job.is_applied.uuid })}
+            onPress={() => navigation.navigate('ApplicationDetailScreen', { applicationUuid: job.is_applied.uuid })}
           >
             <Text style={styles.btnTextWhite}>Xem đơn ứng tuyển của bạn</Text>
           </TouchableOpacity>
@@ -126,7 +130,7 @@ export default function JobDetailScreen() {
             <TouchableOpacity style={styles.btnChatSmall} onPress={() => navigation.navigate('ChatRoom', { recieverId: job.user?.id })}>
               <Ionicons name="chatbubble-ellipses-outline" size={22} color={COLORS.textPrimary || '#111111'} />
             </TouchableOpacity>
-            <TouchableOpacity style={[styles.btnWidth65, { flex: 1 }]} onPress={() => navigation.navigate('ApplyJobModal', { jobUuid: job.uuid })}>
+            <TouchableOpacity style={[styles.btnWidth65, { flex: 1 }]} onPress={() => navigation.navigate('ApplyJobScreen', { jobUuid: job.uuid, jobTitle : job.title,companyName : job.employer_profile.company_name })}>
               <Text style={styles.btnTextWhite}>Ứng tuyển ngay 🔥</Text>
             </TouchableOpacity>
           </View>
@@ -151,7 +155,7 @@ export default function JobDetailScreen() {
         {/* KHỐI 1: BANNER ẢNH TRÀN ĐỈNH */}
         <View style={styles.bannerContainer}>
           <TouchableOpacity 
-            style={[styles.backButton, { top: insets.top -15 }]} 
+            style={[styles.backButton, { top: insets.top -6 }]} 
             onPress={() => navigation.goBack()}
             activeOpacity={0.7}
           >
