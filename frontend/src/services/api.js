@@ -10,7 +10,7 @@ const api = axios.create({
 })
 let logout = null;
 export const setLogout = (func) => logout = func;
-// add token to header
+
 api.interceptors.request.use(
     async (config) => {
         const accessToken = await AsyncStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);

@@ -48,7 +48,7 @@ export const styles = StyleSheet.create({
     borderColor: COLORS.border || '#F3F4F6',
   },
   rowLast: {
-    borderBottomWidth: 0, // Dòng cuối group xóa đường gạch chân
+    borderBottomWidth: 0, 
   },
   rowLeft: {
     flexDirection: 'row',

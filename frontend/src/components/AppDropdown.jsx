@@ -44,11 +44,11 @@ const styles = StyleSheet.create({
         backgroundColor: COLORS.background,
         borderColor: COLORS.border,
         borderWidth: 1,
-        borderRadius: RADIUS.md, // Khớp với style AppInput
+        borderRadius: RADIUS.md, 
         paddingHorizontal: SPACING.md,
     },
     disabled: {
-        backgroundColor: COLORS.surface, // Nền xám khi bị khóa
+        backgroundColor: COLORS.surface,
         opacity: 0.6,
     },
     placeholderStyle: {

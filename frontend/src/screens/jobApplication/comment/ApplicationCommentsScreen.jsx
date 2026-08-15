@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
 import { useApi } from '../../../hooks/useApi';
-// 👇 Nhớ import đúng đường dẫn service bồ vừa viết nhé
+
 import {jobApplicationServices} from '../../../services/jobApplicationService'
 
 import { globalStyles } from '../../../constants/globalStyles';
@@ -24,30 +24,30 @@ export default function ApplicationCommentsScreen() {
     const insets = useSafeAreaInsets();
     const isFocused = useIsFocused();
 
-    // Nhận UUID của đơn ứng tuyển từ màn Detail truyền sang
+    
     const { applicationUuid } = route.params || {};
 
-    // --- HOOKS API ---
-// --- HOOKS API ---
-    // ✅ Đổi jobServices thành jobApplicationService
+    
+
+    
     const { data: commentsData, loading, execute: fetchComments } = useApi(jobApplicationServices.getApplicationComments);
     const { loading: isSubmitting, execute: submitComment } = useApi(jobApplicationServices.createApplicationComment);
 
-    // --- STATES CHO FORM ---
+    
     const [rating, setRating] = useState(5);
     const [review, setReview] = useState('');
 
-    // --- STATES CHO MODAL ---
+    
     const [isDeleting, setIsDeleting] = useState(false);
     const [isConfirmVisible, setIsConfirmVisible] = useState(false);
     const [alertConfig, setAlertConfig] = useState({ visible: false, type: 'info', title: '', message: '' });
 
-    // Load data
+    
     useEffect(() => {
         if (applicationUuid) fetchComments(applicationUuid);
     }, [applicationUuid, isFocused]);
 
-    // --- HÀM TẠO ĐÁNH GIÁ ---
+    
     const handleSaveComment = async () => {
         if (!review.trim()) {
             setAlertConfig({ visible: true, type: 'error', title: 'Cảnh báo', message: 'Vui lòng nhập nội dung đánh giá.' });
@@ -60,8 +60,8 @@ export default function ApplicationCommentsScreen() {
                 visible: true, type: 'success', title: 'Thành công!', message: 'Đã gửi đánh giá thành công.',
                 onCloseOverride: () => {
                     setAlertConfig(prev => ({ ...prev, visible: false }));
-                    fetchComments(applicationUuid); // Refresh lại data
-                    setReview(''); // Xóa form
+                    fetchComments(applicationUuid); 
+                    setReview(''); 
                 }
             });
         } catch (error) {
@@ -69,7 +69,7 @@ export default function ApplicationCommentsScreen() {
         }
     };
 
-    // --- HÀM XÓA ĐÁNH GIÁ ---
+    
     const handleConfirmDelete = async () => {
         setIsConfirmVisible(false);
         setIsDeleting(true);
@@ -79,7 +79,7 @@ export default function ApplicationCommentsScreen() {
                 visible: true, type: 'success', title: 'Đã xóa!', message: 'Đánh giá của bạn đã được gỡ bỏ.',
                 onCloseOverride: () => {
                     setAlertConfig(prev => ({ ...prev, visible: false }));
-                    fetchComments(applicationUuid); // Refresh data
+                    fetchComments(applicationUuid); 
                 }
             });
         } catch (error) {
@@ -89,7 +89,7 @@ export default function ApplicationCommentsScreen() {
         }
     };
 
-    // Component vẽ 5 ngôi sao
+    
     const StarRating = ({ currentRating, onRate, disabled = false }) => (
         <View style={{ flexDirection: 'row', gap: 8, marginVertical: 12, justifyContent: 'center' }}>
             {[1, 2, 3, 4, 5].map(star => (
@@ -104,8 +104,8 @@ export default function ApplicationCommentsScreen() {
         </View>
     );
 
-    // Component hiển thị thẻ Comment của Ứng viên / Employer
-    const CommentCard = ({ data, titleBadge, badgeColor }) => {
+    
+const CommentCard = ({ data, titleBadge, badgeColor }) => {
         if (!data) return null;
         return (
             <View style={styles.commentCard}>
@@ -114,7 +114,13 @@ export default function ApplicationCommentsScreen() {
                 </View>
 
                 <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 12, gap: 12 }}>
-                    <Image source={{ uri: data.author?.avatar || 'https://via.placeholder.com/150' }} style={styles.avatar} />
+                    
+                    {/* ✅ Đã vá lại link ảnh và đóng thẻ Image đàng hoàng */}
+                    <Image 
+                        source={{ uri: data.author?.avatar || 'https://via.placeholder.com/150' }} 
+                        style={styles.avatar || { width: 40, height: 40, borderRadius: 20 }} 
+                    />
+                    
                     <View style={{ flex: 1 }}>
                         <Text style={styles.authorName}>{data.author?.name}</Text>
                         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
@@ -134,7 +140,7 @@ export default function ApplicationCommentsScreen() {
 
     return (
         <View style={[globalStyles.container, { backgroundColor: '#F3F4F6' }]}>
-            {/* HEADER */}
+            
             <View style={[styles.header, { paddingTop: Math.max(insets.top, 24) + 12 }]}>
                 <TouchableOpacity onPress={() => navigation.goBack()} disabled={isSubmitting || isDeleting}>
                     <Ionicons name="arrow-back" size={24} color="#111111" />
@@ -145,7 +151,7 @@ export default function ApplicationCommentsScreen() {
 
             <ScrollView contentContainerStyle={{ paddingBottom: Math.max(insets.bottom, 24) }} keyboardShouldPersistTaps="handled">
 
-                {/* 1. THÔNG TIN CÔNG VIỆC CHUNG */}
+                
                 {commentsData?.job_post && (
                     <View style={styles.jobHeader}>
                         <Image source={{ uri: commentsData.job_post.job_thumbnail }} style={styles.jobThumbnail} />
@@ -153,7 +159,7 @@ export default function ApplicationCommentsScreen() {
                     </View>
                 )}
 
-                {/* 2. DANH SÁCH BÌNH LUẬN ĐÃ CÓ */}
+                
                 <View style={{ paddingHorizontal: 16 }}>
                     <CommentCard
                         data={commentsData?.employer_comment}
@@ -166,7 +172,7 @@ export default function ApplicationCommentsScreen() {
                         badgeColor="#10B981"
                     />
 
-                    {/* HIỆU ỨNG TRỐNG NẾU CẢ 2 CHƯA AI ĐÁNH GIÁ */}
+                    
                     {!commentsData?.employer_comment && !commentsData?.candidate_comment && (
                         <Text style={{ textAlign: 'center', color: '#6B7280', marginVertical: 24, fontStyle: 'italic' }}>
                             Chưa có đánh giá nào cho đơn ứng tuyển này.
@@ -174,11 +180,11 @@ export default function ApplicationCommentsScreen() {
                     )}
                 </View>
 
-                {/* 3. KHỐI FORM ĐÁNH GIÁ HOẶC NÚT XÓA */}
+                
                 {commentsData && (
                     <View style={styles.actionCard}>
                         {commentsData.you_commented ? (
-                            // NẾU ĐÃ COMMENT -> CHỈ CHO XÓA
+                            
                             <View style={{ alignItems: 'center' }}>
                                 <Ionicons name="checkmark-circle" size={48} color="#10B981" />
                                 <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#111', marginTop: 8 }}>Bạn đã gửi đánh giá!</Text>
@@ -194,7 +200,7 @@ export default function ApplicationCommentsScreen() {
                                 />
                             </View>
                         ) : (
-                            // NẾU CHƯA COMMENT -> HIỆN FORM TẠO MỚI
+                            
                             <View>
                                 <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#111', textAlign: 'center' }}>Viết đánh giá của bạn</Text>
 
@@ -222,7 +228,7 @@ export default function ApplicationCommentsScreen() {
                 )}
             </ScrollView>
 
-            {/* MODALS */}
+            
             <AppConfirmModal
                 visible={isConfirmVisible}
                 title="Xóa đánh giá"

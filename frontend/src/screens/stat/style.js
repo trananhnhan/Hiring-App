@@ -1,4 +1,4 @@
-// src/screens/stats/style.js
+
 import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
@@ -8,7 +8,7 @@ export const styles = StyleSheet.create({
     scrollContent: { padding: 16 },
     dashboardContainer: { width: '100%' },
     
-    // Khối Employer
+    
     mainRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 24 },
     mainCard: { flex: 1, padding: 16, borderRadius: 16, alignItems: 'center', marginHorizontal: 6, elevation: 1, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 2 },
     cardValue: { fontSize: 28, fontWeight: 'bold', marginTop: 8 },
@@ -23,7 +23,7 @@ export const styles = StyleSheet.create({
     progressTrack: { height: 8, backgroundColor: '#E5E7EB', borderRadius: 4, overflow: 'hidden' },
     progressBar: { height: '100%', borderRadius: 4 },
 
-    // Khối Candidate
+    
     rateCard: { backgroundColor: '#6366F1', borderRadius: 20, padding: 20, marginBottom: 24, elevation: 3, shadowColor: '#6366F1', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 6 },
     rateTitle: { color: 'rgba(255,255,255,0.8)', fontSize: 14, fontWeight: '500' },
     rateValue: { color: '#FFFFFF', fontSize: 42, fontWeight: 'bold', marginTop: 4 },

@@ -8,19 +8,19 @@ export const AppAlertModal = ({
   title, 
   message, 
   onClose, 
-  type = 'error' // 'success' | 'error' | 'info'
+  type = 'error' 
 }) => {
   
-  // Tự động đổi Icon và màu sắc theo Type thông báo
+  
   const getTypeConfig = () => {
     switch (type) {
       case 'success':
-        return { icon: 'checkmark-circle', color: '#10B981' }; // Màu xanh lá
+        return { icon: 'checkmark-circle', color: '#10B981' }; 
       case 'info':
-        return { icon: 'information-circle', color: '#3B82F6' }; // Màu xanh dương
+        return { icon: 'information-circle', color: '#3B82F6' }; 
       case 'error':
       default:
-        return { icon: 'close-circle', color: '#EF4444' }; // Màu đỏ
+        return { icon: 'close-circle', color: '#EF4444' }; 
     }
   };
 
@@ -31,14 +31,14 @@ export const AppAlertModal = ({
       <View style={styles.overlay}>
         <View style={styles.alertBox}>
           
-          {/* Icon trạng thái bự ở giữa */}
+          
           <Ionicons name={config.icon} size={54} color={config.color} style={styles.icon} />
           
-          {/* Tiêu đề và Nội dung */}
+          
           <Text style={styles.title}>{title || 'Thông báo'}</Text>
           <Text style={styles.message}>{message}</Text>
           
-          {/* Nút đóng duy nhất */}
+          
           <TouchableOpacity 
             style={[styles.button, { backgroundColor: COLORS.textPrimary || '#111111' }]} 
             onPress={onClose}

@@ -30,9 +30,9 @@ export default function HomeTopTabs() {
         }, 
       }}
     >
-      {/* TAB CON 1: Thay đổi động theo Role */}
+      
       <TopTab.Screen 
-        name="LeftFeed" 
+        name="RightFeed" 
         component={FeedScreen} 
         options={{ 
           tabBarLabel: isEmployer ? 'Tin đã đăng' : 'Followed' 
@@ -40,9 +40,8 @@ export default function HomeTopTabs() {
         initialParams={{ feedType: isEmployer ? 'my_jobs' : 'followed' }}
       />
 
-      {/* TAB CON 2: Cả 2 cùng xem chung một Feed công việc tổng thể */}
       <TopTab.Screen 
-        name="RightFeed" 
+        name="LeftFeed" 
         component={FeedScreen} 
         options={{ 
           tabBarLabel: isEmployer ? 'Job toàn quốc' : 'Feed' 

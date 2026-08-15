@@ -35,8 +35,8 @@ export const jobServices = {
         return response.data;
     },
 
-    // 2. Hàm gom data an toàn (Chống sập React Native)
-    // 2. Hàm gom data an toàn (Có gắn log để debug)
+    
+    
     buildFormData: (payload) => {
         const formData = new FormData();
 
@@ -45,12 +45,10 @@ export const jobServices = {
                 payload[key].forEach(id => {
                     formData.append('career_fields_id', id);
                 });
-                console.log(`✅ Đã gói [Mảng ID] ${key}:`, payload[key]);
             }
             else if (key === 'work_days') {
                 const stringifiedData = JSON.stringify(payload[key]);
                 formData.append(key, stringifiedData);
-                console.log(`✅ Đã gói [JSON String] ${key}:`, stringifiedData);
             }
             else if (key === 'job_thumbnail') {
                 if (payload[key] && typeof payload[key] === 'object' && payload[key].uri) {
@@ -73,19 +71,19 @@ export const jobServices = {
 
         return formData;
     },
-    // 3. Tạo mới (POST)
+    
     createJobPost: async (payload) => {
         const hasImage = payload.job_thumbnail && typeof payload.job_thumbnail === 'object' && payload.job_thumbnail.uri;
 
-        // Tách JSON payload (Xóa ảnh ra khỏi cục data chữ)
+        
         const jsonPayload = { ...payload };
         delete jsonPayload.job_thumbnail;
 
-        // 💥 NHỊP 1: Gửi POST toàn bộ Text, Lịch, Ngành nghề bằng JSON
+        
         const createRes = await api.post(endpoints.jobPosts.create, jsonPayload);
-        const newJobUuid = createRes.data.uuid; // Lấy UUID vừa được tạo ra
+        const newJobUuid = createRes.data.uuid; 
 
-        // 💥 NHỊP 2: Nếu có ảnh, bắn thêm 1 lệnh PATCH đắp ảnh vào
+        
         if (hasImage) {
             const imageFormData = new FormData();
             imageFormData.append('job_thumbnail', {
@@ -97,23 +95,23 @@ export const jobServices = {
             const patchRes = await api.patch(endpoints.jobPosts.update(newJobUuid), imageFormData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
-            return patchRes.data; // Trả về data hoàn chỉnh có ảnh
+            return patchRes.data; 
         }
 
-        return createRes.data; // Nếu không có ảnh thì trả về luôn nhịp 1
+        return createRes.data; 
     },
-    // 4. Cập nhật (PATCH)
+    
     updateJobPost: async (uuid, payload) => {
         const hasNewImage = payload.job_thumbnail && typeof payload.job_thumbnail === 'object' && payload.job_thumbnail.uri;
 
-        // Tách JSON payload
+        
         const jsonPayload = { ...payload };
         delete jsonPayload.job_thumbnail;
 
-        // 💥 NHỊP 1: Gửi PATCH dọn dẹp Lịch làm việc & update text
+        
         await api.patch(endpoints.jobPosts.update(uuid), jsonPayload);
 
-        // 💥 NHỊP 2: Nếu có ảnh mới, bắn thêm nhát PATCH thứ 2
+        
         if (hasNewImage) {
             const imageFormData = new FormData();
             imageFormData.append('job_thumbnail', {
@@ -128,7 +126,7 @@ export const jobServices = {
             return finalRes.data;
         }
 
-        // Kéo lại cục data mới nhất nếu không đắp ảnh
+        
         const getRes = await api.get(endpoints.jobPosts.retrieve(uuid));
         return getRes.data;
     },

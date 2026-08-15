@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
-import { useNavigation, useRoute, useIsFocused } from '@react-navigation/native'; // Vẫn giữ nguyên useIsFocused
+import { useNavigation, useRoute, useIsFocused } from '@react-navigation/native'; 
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -13,7 +13,7 @@ export default function JobApplicationsListScreen() {
     const navigation = useNavigation();
     const route = useRoute();
     const insets = useSafeAreaInsets();
-    const isFocused = useIsFocused(); // Hook giữ cho data luôn mới
+    const isFocused = useIsFocused(); 
 
     const { jobUuid } = route.params;
 
@@ -41,7 +41,7 @@ export default function JobApplicationsListScreen() {
         }
     };
 
-    // Auto update khi màn hình này hiện lên lại (nhờ isFocused)
+    
     useEffect(() => {
         if (jobUuid && isFocused) {
             setPage(1);
@@ -57,7 +57,7 @@ export default function JobApplicationsListScreen() {
         }
     };
 
-    // Hàm dùng chung cho Avatar và Tên (điều hướng qua Public Profile)
+    
     const handleGoToProfile = (candidate) => {
         navigation.navigate('PublicProfileScreen', { 
             username: candidate.username, 
@@ -74,10 +74,10 @@ export default function JobApplicationsListScreen() {
             <TouchableOpacity 
                 style={styles.candidateCard}
                 activeOpacity={0.7}
-                // NÚT BẤM TO: Click vào bất kỳ đâu trống sẽ văng sang Chi tiết đơn
+                
                 onPress={() => navigation.navigate('ApplicationDetailScreen', { applicationUuid: item.uuid })}
             >
-                {/* NÚT BẤM NHỎ 1: Avatar */}
+                
                 <TouchableOpacity onPress={() => handleGoToProfile(candidate)}>
                     {candidate.avatar ? (
                         <Image source={{ uri: candidate.avatar }} style={styles.avatar} />
@@ -88,9 +88,9 @@ export default function JobApplicationsListScreen() {
                     )}
                 </TouchableOpacity>
 
-                {/* Info */}
+                
                 <View style={styles.infoCol}>
-                    {/* NÚT BẤM NHỎ 2: Tên ứng viên */}
+                    
                     <TouchableOpacity onPress={() => handleGoToProfile(candidate)}>
                         <Text style={styles.candidateName} numberOfLines={1}>{candidate.name}</Text>
                     </TouchableOpacity>
@@ -99,7 +99,7 @@ export default function JobApplicationsListScreen() {
                     <Text style={styles.dateText}>📅 {formatDate(item.created_date)}</Text>
                 </View>
 
-                {/* Status Chip (Không bọc nút bấm ở đây để click xuyên thủng xuống nền Card) */}
+                
                 <View style={styles.statusCol}>
                     <View style={[globalStyles.chip, { backgroundColor: resultColors[item.result] || '#9CA3AF', borderColor: 'transparent', paddingHorizontal: 10 }]}>
                         <Text style={[globalStyles.chipText, { color: '#FFFFFF', fontSize: 11 }]}>

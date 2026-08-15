@@ -15,10 +15,10 @@ export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const { user: currentUser, logout } = useContext(AuthContext);
 
-  // Nhận diện role để phân chia menu
+  
   const isEmployer = currentUser?.role === 'EMPLOYER';
 
-  // Component con dùng chung cho từng dòng chức năng (Menu Row)
+  
   const SettingRow = ({ icon, title, description, onPress, isLast = false }) => (
     <TouchableOpacity 
       style={[styles.rowContainer, isLast && styles.rowLast]} 
@@ -41,7 +41,7 @@ export default function SettingsScreen() {
   return (
     <View style={[globalStyles.container, { backgroundColor: '#F9FAFB', paddingTop: Math.max(insets.top, 24) }]}>
       
-      {/* KHỐI ĐỈNH HEADER */}
+      
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
           <Ionicons name="arrow-back" size={22} color={COLORS.textPrimary || '#111111'} />
@@ -52,7 +52,7 @@ export default function SettingsScreen() {
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         
-        {/* KHỐI 1: TÀI KHOẢN CÁ NHÂN (Dùng chung cho cả 2 Role) */}
+        
         <Text style={styles.sectionTitle}>Tài khoản & Bảo mật</Text>
         <View style={styles.menuGroup}>
           <SettingRow 
@@ -60,25 +60,25 @@ export default function SettingsScreen() {
             title="Thông tin cá nhân" 
             description="Quản lý tên hiển thị, avatar, thông tin liên hệ"
             onPress={() => navigation.navigate('EditProfileScreen')} 
-            isLast={false} // Đổi thành false vì đã có dòng thống kê ở dưới
+            isLast={false} 
           />
           
-          {/* ✅ DÒNG THỐNG KÊ PHÂN TÍCH MỚI TINH */}
+          
           <SettingRow 
             icon="bar-chart-outline" 
             title="Thống kê phân tích" 
             description={isEmployer ? "Xem số liệu bài đăng và tổng đơn ứng tuyển" : "Xem tỷ lệ trúng tuyển và lịch sử nộp đơn"}
-            onPress={() => navigation.navigate('StatsScreen')} // Bay thẳng tới màn Stats ở folder khác
-            isLast={true} // Dòng cuối cùng của khối 1
+            onPress={() => navigation.navigate('StatsScreen')} 
+            isLast={true} 
           />
         </View>
 
-        {/* KHỐI 2: DOANH NGHIỆP (Chỉ hiện nếu là EMPLOYER) */}
+        
         {isEmployer && (
           <>
             <Text style={styles.sectionTitle}>Quản lý Doanh nghiệp</Text>
             <View style={styles.menuGroup}>
-              {/* Nút truy cập vào Quản lý Cơ sở / Địa chỉ vừa tạo */}
+              
               <SettingRow 
                 icon="location-outline" 
                 title="Cơ sở / Văn phòng" 
@@ -97,7 +97,7 @@ export default function SettingsScreen() {
           </>
         )}
 
-        {/* NÚT ĐĂNG XUẤT */}
+        
         <TouchableOpacity style={styles.logoutButton} activeOpacity={0.8} onPress={logout}>
           <Ionicons name="log-out-outline" size={20} color="#FFFFFF" />
           <Text style={styles.logoutText}>Đăng xuất tài khoản</Text>

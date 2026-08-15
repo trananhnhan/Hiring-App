@@ -17,7 +17,7 @@ import { AppButton } from '../../../components/AppButton';
 import { AppDropdown } from '../../../components/AppDropdown';
 import { AppMultiSelect } from '../../../components/AppMultiSelect';
 import { AppAlertModal } from '../../../components/AppAlertModal';
-import { AppConfirmModal } from '../../../components/AppConfirmModal'; // ✅ Import Modal Xác nhận
+import { AppConfirmModal } from '../../../components/AppConfirmModal'; 
 
 import { getSortedWorkDays, translateDay, formatTime } from '../../../utils/formatter';
 
@@ -26,7 +26,7 @@ export default function CreateEditJobPostScreen() {
     const route = useRoute();
     const insets = useSafeAreaInsets();
     
-    // --- 1. KÉO DỮ LIỆU TỪ CONTEXT ---
+    
     const { user: currentUser } = useContext(AuthContext);
     const { careerFields } = useGlobalData(); 
     
@@ -50,16 +50,16 @@ export default function CreateEditJobPostScreen() {
         });
         return options;
     }, [careerFields]);
-
-    // --- 2. NHẬN DIỆN MODE ---
+   
+    
     const { jobUuid } = route.params || {};
     const isEditMode = !!jobUuid;
 
-    // --- 3. KHAI BÁO HOOK useApi ---
+    
     const { data: detailData, loading: detailLoading, execute: fetchDetail } = useApi(jobServices.getJobPostDetail);
     const { data: submitResult, loading: isSubmitting, error: submitError, execute: submitJobPost } = useApi(isEditMode ? jobServices.updateJobPost : jobServices.createJobPost);
 
-    // --- 4. FORM STATES ---
+    
     const [title, setTitle] = useState('');
     const [jobThumbnail, setJobThumbnail] = useState(null); 
     const [salaryMin, setSalaryMin] = useState('');
@@ -73,12 +73,12 @@ export default function CreateEditJobPostScreen() {
     const [workDays, setWorkDays] = useState([]);
     const [addressUuid, setAddressUuid] = useState(isEditMode ? null : fallbackAddressUuid);
 
-    // ✅ STATES CHO CHỨC NĂNG XÓA VÀ THÔNG BÁO
+    
     const [isDeleting, setIsDeleting] = useState(false);
     const [isConfirmVisible, setIsConfirmVisible] = useState(false);
     const [modalConfig, setModalConfig] = useState({ visible: false, type: 'info', title: '', message: '' });
 
-    // --- 5. EFFECTS ĐỔ DỮ LIỆU ---
+    
     useEffect(() => {
         if (isEditMode) fetchDetail(jobUuid);
     }, [isEditMode, jobUuid]);
@@ -133,7 +133,7 @@ export default function CreateEditJobPostScreen() {
         }
     }, [submitError]);
 
-    // --- 6. XỬ LÝ ẢNH THUMBNAIL ---
+    
     const handlePickImage = async () => {
         const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (permissionResult.granted === false) {
@@ -155,7 +155,7 @@ export default function CreateEditJobPostScreen() {
         }
     };
 
-    // --- 7. XỬ LÝ LỊCH LÀM VIỆC ---
+    
     const [workDayModalVisible, setWorkDayModalVisible] = useState(false);
     const [tempWorkDay, setTempWorkDay] = useState({ 
         day_of_week: 'MON', work_start: '08:00:00', work_end: '17:00:00', break_start: '12:00:00', break_end: '13:00:00' 
@@ -186,7 +186,7 @@ export default function CreateEditJobPostScreen() {
         { label: 'Chủ nhật', value: 'SUN' }
     ];
 
-    // --- 8. SUBMIT FORM (SỬA) ---
+    
     const handleSave = () => {
         if (!title.trim() || !description.trim() || !addressUuid || careerFieldsId.length === 0) {
             setModalConfig({ 
@@ -212,7 +212,7 @@ export default function CreateEditJobPostScreen() {
         else submitJobPost(payload);
     };
 
-    // --- 9. HÀM XÓA BÀI ĐĂNG (TRỰC TIẾP QUA SERVICE) ---
+    
     const handleConfirmDelete = async () => {
         setIsConfirmVisible(false); 
         setIsDeleting(true); 
@@ -227,7 +227,7 @@ export default function CreateEditJobPostScreen() {
                 message: 'Bài đăng tuyển dụng đã được xóa thành công khỏi hệ thống.',
                 onCloseOverride: () => {
                     setModalConfig(prev => ({ ...prev, visible: false }));
-                    // Về 2 nhịp: Thoát khỏi Edit -> Thoát khỏi Detail -> Về màn hình Profile quản lý
+                    
                     navigation.pop(2); 
                 }
             });
@@ -236,7 +236,7 @@ export default function CreateEditJobPostScreen() {
                 visible: true, 
                 type: 'error', 
                 title: 'Xóa thất bại',
-                message: 'Không thể xóa bài đăng lúc này. Đảm bảo bài đăng không có đơn ứng tuyển dính kèm.'
+                message: 'Không thể xóa bài đăng lúc này.'
             });
         } finally {
             setIsDeleting(false); 
@@ -257,7 +257,7 @@ export default function CreateEditJobPostScreen() {
 
             <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
                 
-                {/* ẢNH THUMBNAIL */}
+                
                 <View style={styles.formGroup}>
                     <Text style={styles.inputLabel}>Ảnh đại diện bài đăng</Text>
                     <TouchableOpacity 
@@ -275,7 +275,7 @@ export default function CreateEditJobPostScreen() {
                     </TouchableOpacity>
                 </View>
 
-                {/* THÔNG TIN CƠ BẢN */}
+                
                 <View style={styles.formGroup}>
                     <Text style={styles.inputLabel}>Tiêu đề công việc <Text style={{ color: 'red' }}>*</Text></Text>
                     <TextInput style={styles.input} placeholder="Ví dụ: Lập trình viên Backend..." value={title} onChangeText={setTitle} />
@@ -297,7 +297,7 @@ export default function CreateEditJobPostScreen() {
                     />
                 </View>
 
-                {/* LƯƠNG & SỐ LƯỢNG */}
+                
                 <View style={{ flexDirection: 'row', gap: 12 }}>
                     <View style={[styles.formGroup, { flex: 1 }]}>
                         <Text style={styles.inputLabel}>Lương tối thiểu</Text>
@@ -339,7 +339,7 @@ export default function CreateEditJobPostScreen() {
                     <TextInput style={styles.textArea} multiline numberOfLines={6} placeholder="Nhập yêu cầu, quyền lợi..." value={description} onChangeText={setDescription} textAlignVertical="top" />
                 </View>
 
-                {/* LỊCH LÀM VIỆC */}
+                
                 <View style={styles.formGroup}>
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
                         <Text style={styles.inputLabel}>Lịch làm việc</Text>
@@ -371,7 +371,7 @@ export default function CreateEditJobPostScreen() {
                 </View>
             </ScrollView>
 
-            {/* ✅ FOOTER GOM 2 NÚT THÔNG MINH */}
+            
             <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 24) }]}>
                 <View style={{ gap: 8 }}>
                     <AppButton
@@ -381,7 +381,7 @@ export default function CreateEditJobPostScreen() {
                         disabled={isSubmitting || detailLoading || isDeleting}
                     />
                     
-                    {/* Nút Xóa chỉ hiện khi ở Edit Mode */}
+                    
                     {isEditMode && (
                         <AppButton 
                             title={isDeleting ? "Đang xóa..." : "Xóa Bài Đăng"} 
@@ -394,7 +394,7 @@ export default function CreateEditJobPostScreen() {
                 </View>
             </View>
 
-            {/* MODAL THÊM LỊCH */}
+            
             <Modal visible={workDayModalVisible} transparent={true} animationType="fade">
                 <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', padding: 16 }}>
                     <View style={{ width: '100%', backgroundColor: '#FFF', borderRadius: 12, padding: 20 }}>
@@ -439,7 +439,7 @@ export default function CreateEditJobPostScreen() {
                 </View>
             </Modal>
 
-            {/* ✅ MODAL 1: HỎI XÁC NHẬN TRƯỚC KHI XÓA */}
+            
             <AppConfirmModal 
                 visible={isConfirmVisible}
                 title="Xóa Bài Đăng"
@@ -451,7 +451,7 @@ export default function CreateEditJobPostScreen() {
                 onConfirm={handleConfirmDelete}
             />
 
-            {/* ✅ MODAL 2: THÔNG BÁO XONG VIỆC (DÙNG CHUNG CHO CẢ SAVE VÀ DELETE) */}
+            
             <AppAlertModal 
                 visible={modalConfig.visible} 
                 type={modalConfig.type} 

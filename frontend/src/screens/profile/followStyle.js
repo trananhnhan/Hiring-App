@@ -19,21 +19,21 @@ export const styles = StyleSheet.create({
     color: '#111111',
   },
   
-  // ✅ ĐÃ SỬA: Bố cục hàng chính
+  
   userRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between', // Tách khối thông tin và nút bấm về 2 phía
+    justifyContent: 'space-between', 
     paddingVertical: 12,
     borderBottomWidth: 1,
     borderColor: '#F3F4F6',
   },
   
-  // ✅ ĐÃ SỬA: Khối bấm bên trái (thông tin)
+  
   userInfoBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    flex: 1, // Chiếm hết không gian bên trái
+    flex: 1, 
     paddingRight: 10,
   },
   avatar: {
@@ -53,21 +53,21 @@ export const styles = StyleSheet.create({
     marginRight: 12,
   },
   
-  // ✅ ĐÃ SỬA: Khối chứa tên và badge
+  
   nameRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    flexWrap: 'wrap', // ✅ Cho phép xuống dòng nếu tên quá dài
-    gap: 6, // ✅ Tự tạo khoảng cách đẹp giữa các con (iOS 13.4+, Android API 30+)
+    flexWrap: 'wrap', 
+    gap: 6, 
   },
   
-  // ✅ ĐÃ SỬA: Tên người dùng
+  
   name: {
     fontSize: FONTSIZE.md || 15,
     fontWeight: FONTWEIGHT.bold || 'bold',
     color: '#111111',
-    flexShrink: 1, // ✅ Cho phép tên co lại nếu badge hoặc nút bấm xuất hiện
-    marginRight: 6, // ✅ Tạo khoảng cách cứng để tách biệt với badge
+    flexShrink: 1, 
+    marginRight: 6, 
   },
   username: {
     fontSize: FONTSIZE.sm || 13,
@@ -85,7 +85,7 @@ export const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
 
-  // ✅ Giữ nguyên phần nút bấm
+  
   followBtn: {
     paddingHorizontal: 12,
     paddingVertical: 6,

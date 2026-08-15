@@ -7,7 +7,7 @@ import { styles } from '../style';
 export default function ReviewCard({ item }) {
   const navigation = useNavigation();
 
-  // Hàm xử lý điều hướng thông minh khi nhấn vào thông tin tác giả
+  
   const handleAuthorPress = () => {
     if (item.author?.username && item.author?.role) {
       navigation.navigate('PublicProfileScreen', { 
@@ -20,7 +20,7 @@ export default function ReviewCard({ item }) {
   return (
     <View style={styles.reviewCard}>
       
-      {/* ✅ ĐÃ SỬA: Đổi từ View sang TouchableOpacity để cho phép click bay sang Public Profile */}
+      
       <TouchableOpacity 
         style={styles.reviewHeader} 
         activeOpacity={0.7}
@@ -39,10 +39,10 @@ export default function ReviewCard({ item }) {
         </View>
       </TouchableOpacity>
 
-      {/* NỘI DUNG BÌNH LUẬN */}
+      
       <Text style={styles.reviewComment}>"{item.review}"</Text>
 
-      {/* LINK ĐIỀU HƯỚNG SANG JOB DETAIL */}
+      
       {item.job_post?.uuid && (
         <TouchableOpacity 
           onPress={() => navigation.navigate('JobDetail', { jobUuid: item.job_post.uuid })}

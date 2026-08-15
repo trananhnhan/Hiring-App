@@ -4,7 +4,7 @@ import { useRoute, useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
-import { AuthContext } from '../../context/AuthContext'; // ✅ Kéo context vào để lấy role user hiện tại
+import { AuthContext } from '../../context/AuthContext'; 
 import { profileServices } from '../../services/profileService';
 import { globalStyles } from '../../constants/globalStyles';
 import { styles } from './followStyle';
@@ -13,7 +13,7 @@ export default function FollowListScreen() {
   const route = useRoute();
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
-  const { user: currentUser } = useContext(AuthContext); // Lấy role để cấp quyền hiện nút
+  const { user: currentUser } = useContext(AuthContext); 
 
   const { type, username } = route.params || {};
   const isFollowingMode = type === 'following'; 
@@ -65,12 +65,12 @@ export default function FollowListScreen() {
     }
   };
 
-  // ✅ HÀM MỚI: Xử lý bật/tắt follow chớp nhoáng (Optimistic Update)
+  
   const handleFollowToggle = async (targetUsername, itemIndex) => {
-    // 1. Lưu lại trạng thái cũ để phòng hờ rớt mạng
+    
     const previousStatus = listData[itemIndex].you_followed;
 
-    // 2. Cập nhật giao diện lập tức: Đảo ngược true/false của đúng item đó
+    
     setListData(prevData => {
       const newData = [...prevData];
       newData[itemIndex] = { ...newData[itemIndex], you_followed: !previousStatus };
@@ -78,11 +78,11 @@ export default function FollowListScreen() {
     });
 
     try {
-      // 3. Bắn lệnh lên Backend
+      
       await profileServices.followEmployer(targetUsername);
     } catch (err) {
       console.log("Lỗi Toggle Follow tại danh sách:", err);
-      // 4. Nếu lỗi, Rollback trả lại nguyên trạng thái ban đầu
+      
       setListData(prevData => {
         const newData = [...prevData];
         newData[itemIndex] = { ...newData[itemIndex], you_followed: previousStatus };
@@ -98,7 +98,7 @@ export default function FollowListScreen() {
     return (
       <View style={styles.userRow}>
         
-        {/* KHỐI TRÁI: BẤM ĐỂ XEM HỒ SƠ */}
+        
         <TouchableOpacity 
           style={styles.userInfoBtn}
           activeOpacity={0.7}
@@ -121,15 +121,15 @@ export default function FollowListScreen() {
                 </Text>
               </View>
             </View>
-            {/* Hiển thị thêm tên công ty từ JSON nếu có */}
+            
             <Text style={styles.username}>
               {isEmployer && item.followed?.company_name ? `🏢 ${item.followed.company_name}` : `@${targetUser.username}`}
             </Text>
           </View>
         </TouchableOpacity>
 
-        {/* KHỐI PHẢI: NÚT TOGGLE FOLLOW */}
-        {/* Điều kiện: Chỉ hiện nếu bạn đang là Candidate và mục tiêu là Công ty */}
+        
+        
         {currentUser?.role === 'CANDIDATE' && isEmployer && (
           <TouchableOpacity 
             style={[styles.followBtn, item.you_followed && styles.followingBtn]}

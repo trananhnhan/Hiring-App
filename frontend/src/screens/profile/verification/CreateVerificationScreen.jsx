@@ -52,7 +52,7 @@ export default function CreateVerificationScreen() {
                 visible: true, type: 'success', title: 'Thành công', message: 'Yêu cầu của bạn đã được gửi.',
                 onCloseOverride: () => {
                     setAlertConfig(prev => ({ ...prev, visible: false }));
-                    navigation.goBack(); // Đẩy về trang List, List sẽ tự reload
+                    navigation.goBack(); 
                 }
             });
         } catch (error) {

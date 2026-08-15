@@ -11,7 +11,7 @@ import { resumeServices } from '../../../services/resumeService';
 import { useApi } from '../../../hooks/useApi';
 
 import { globalStyles } from '../../../constants/globalStyles';
-// Bồ có thể xài chung file style của JobPost hoặc tạo mới style.js cho Resume tùy ý
+
 import { styles } from './style';
 
 import { AppButton } from '../../../components/AppButton';
@@ -24,7 +24,7 @@ export default function CreateEditResumeScreen() {
     const route = useRoute();
     const insets = useSafeAreaInsets();
     
-    // --- 1. GLOBAL DATA CHO NGÀNH NGHỀ ---
+    
     const { careerFields } = useGlobalData(); 
     
     const formattedCareerFields = useMemo(() => {
@@ -40,15 +40,15 @@ export default function CreateEditResumeScreen() {
         return options;
     }, [careerFields]);
 
-    // --- 2. NHẬN DIỆN MODE ---
+    
     const { resumeUuid } = route.params || {};
     const isEditMode = !!resumeUuid;
 
-    // --- 3. KHAI BÁO HOOKS ---
+    
     const { data: detailData, loading: detailLoading, execute: fetchDetail } = useApi(resumeServices.getResumeDetail);
     const { data: submitResult, loading: isSubmitting, error: submitError, execute: submitResume } = useApi(isEditMode ? resumeServices.updateResume : resumeServices.createResume);
 
-    // --- 4. STATES FORM ---
+    
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [status, setStatus] = useState('PUBLIC');
@@ -57,7 +57,7 @@ export default function CreateEditResumeScreen() {
 
     const [modalConfig, setModalConfig] = useState({ visible: false, type: 'info', title: '', message: '' });
 
-    // --- 5. ĐỔ DATA KHI EDIT ---
+    
     useEffect(() => {
         if (isEditMode) fetchDetail(resumeUuid);
     }, [isEditMode, resumeUuid]);
@@ -72,7 +72,7 @@ export default function CreateEditResumeScreen() {
         }
     }, [detailData]);
 
-    // --- 6. XỬ LÝ KẾT QUẢ SUBMIT ---
+    
     useEffect(() => {
         if (submitResult) {
             setModalConfig({
@@ -95,7 +95,7 @@ export default function CreateEditResumeScreen() {
         }
     }, [submitError]);
 
-    // --- 7. CHỌN ẢNH CV ---
+    
     const handlePickImage = async () => {
         const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (!permissionResult.granted) {
@@ -106,7 +106,7 @@ export default function CreateEditResumeScreen() {
         const result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ['images'],
             allowsEditing: true,
-            aspect: [3, 4], // Tỉ lệ dọc chuẩn cho CV/Resume
+            aspect: [3, 4], 
             quality: 0.8,
         });
 
@@ -120,7 +120,7 @@ export default function CreateEditResumeScreen() {
         }
     };
 
-    // --- 8. LƯU FORM ---
+    
     const handleSave = () => {
         if (!title.trim() || careerFieldsId.length === 0) {
             setModalConfig({ 
@@ -134,7 +134,7 @@ export default function CreateEditResumeScreen() {
             title, 
             description, 
             status, 
-            career_fields_id: careerFieldsId, // Đổi sang career_fields cho DRF
+            career_fields_id: careerFieldsId, 
             resume_img: resumeImg
         };
 
@@ -156,7 +156,7 @@ export default function CreateEditResumeScreen() {
 
             <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
                 
-                {/* ẢNH CV */}
+                
                 <View style={styles.formGroup}>
                     <Text style={styles.inputLabel}>Ảnh bản mềm CV (Tùy chọn)</Text>
                     <TouchableOpacity 
@@ -174,13 +174,13 @@ export default function CreateEditResumeScreen() {
                     </TouchableOpacity>
                 </View>
 
-                {/* TÊN CV */}
+                
                 <View style={styles.formGroup}>
                     <Text style={styles.inputLabel}>Tên hồ sơ (Tiêu đề) <Text style={{ color: 'red' }}>*</Text></Text>
                     <TextInput style={styles.input} placeholder="VD: CV Lập trình viên Frontend" value={title} onChangeText={setTitle} />
                 </View>
 
-                {/* NGÀNH NGHỀ */}
+                
                 <View style={styles.formGroup}>
                     <Text style={styles.inputLabel}>Lĩnh vực chuyên môn <Text style={{ color: 'red' }}>*</Text></Text>
                     <AppMultiSelect
@@ -189,7 +189,7 @@ export default function CreateEditResumeScreen() {
                     />
                 </View>
 
-                {/* TRẠNG THÁI */}
+                
                 <View style={styles.formGroup}>
                     <Text style={styles.inputLabel}>Trạng thái hiển thị</Text>
                     <AppDropdown
@@ -202,7 +202,7 @@ export default function CreateEditResumeScreen() {
                     />
                 </View>
 
-                {/* MÔ TẢ NGẮN */}
+                
                 <View style={styles.formGroup}>
                     <Text style={styles.inputLabel}>Giới thiệu bản thân</Text>
                     <TextInput style={styles.textArea} multiline numberOfLines={5} placeholder="Chia sẻ ngắn gọn về mục tiêu nghề nghiệp, kỹ năng nổi bật..." value={description} onChangeText={setDescription} textAlignVertical="top" />
@@ -217,7 +217,7 @@ export default function CreateEditResumeScreen() {
                 />
             </View>
 
-            {/* MODAL THÔNG BÁO - Đã sửa lỗi onCloseOverride */}
+            
             <AppAlertModal 
                 visible={modalConfig.visible} type={modalConfig.type} title={modalConfig.title} message={modalConfig.message} 
                 onClose={() => {

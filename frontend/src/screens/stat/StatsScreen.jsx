@@ -1,4 +1,4 @@
-// src/screens/stats/StatsScreen.jsx
+
 import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, ScrollView, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -58,7 +58,7 @@ export default function StatsScreen() {
             <Text style={styles.sectionTitle}>Trạng thái đơn ứng tuyển</Text>
             
             <View style={styles.statusList}>
-                {/* 1. Đã nhận việc */}
+                
                 <View style={styles.statusItem}>
                     <View style={styles.statusHeader}>
                         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -72,7 +72,7 @@ export default function StatsScreen() {
                     </View>
                 </View>
 
-                {/* 2. Đang xem xét (REVIEWING) - MÀU XANH DƯƠNG MỚI */}
+                
                 <View style={styles.statusItem}>
                     <View style={styles.statusHeader}>
                         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -86,7 +86,7 @@ export default function StatsScreen() {
                     </View>
                 </View>
 
-                {/* 3. Đang chờ */}
+                
                 <View style={styles.statusItem}>
                     <View style={styles.statusHeader}>
                         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -100,7 +100,7 @@ export default function StatsScreen() {
                     </View>
                 </View>
 
-                {/* 4. Bị từ chối */}
+                
                 <View style={styles.statusItem}>
                     <View style={styles.statusHeader}>
                         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -130,7 +130,7 @@ export default function StatsScreen() {
 
             <Text style={styles.sectionTitle}>Tổng quan hồ sơ</Text>
             
-            {/* Box Full Width: Tổng đơn nộp */}
+            
             <View style={[styles.gridContainer, { borderBottomWidth: 1, borderColor: '#E5E7EB', borderRadius: 8, overflow: 'hidden' }]}>
                 <View style={[styles.gridItem, { paddingVertical: 16 }]}>
                     <Text style={styles.gridNumber}>{stats.total_applications}</Text>
@@ -138,14 +138,14 @@ export default function StatsScreen() {
                 </View>
             </View>
 
-            {/* Grid 2x2: Cho 4 trạng thái */}
+            
             <View style={styles.gridContainer}>
                 <View style={styles.gridItem}>
                     <Text style={[styles.gridNumber, { color: '#10B981' }]}>{stats.accepted}</Text>
                     <Text style={styles.gridLabel}>Được nhận</Text>
                 </View>
                 <View style={[styles.gridItem, { borderLeftWidth: 1, borderColor: '#E5E7EB' }]}>
-                    {/* Thêm cột Reviewing ở đây */}
+                    
                     <Text style={[styles.gridNumber, { color: '#3B82F6' }]}>{stats.reviewing || 0}</Text>
                     <Text style={styles.gridLabel}>Đang xem xét</Text>
                 </View>

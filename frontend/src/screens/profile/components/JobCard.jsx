@@ -14,7 +14,7 @@ export default function JobCard({ item }) {
       activeOpacity={0.8}
       onPress={() => navigation.navigate('JobDetail', { jobUuid: item.uuid })}
     >
-      {/* 1. STATUS BADGE */}
+      
       {item.status === 'OPEN' && (
         <View style={globalStyles.statusOpenBadgeContainer}><Text style={globalStyles.statusBadgeText}>OPEN</Text></View>
       )}
@@ -25,7 +25,7 @@ export default function JobCard({ item }) {
         <View style={globalStyles.statusDraftBadgeContainer}><Text style={globalStyles.statusBadgeText}>DRAFT</Text></View>
       )}
 
-      {/* 2. TOP INFO GROUP (LOGO + TEXT) */}
+      
       <View style={[globalStyles.rowCenter, { alignItems: 'flex-start', gap: 12 }]}>
         <View style={styles.logoWrapper}>
           {item.job_thumbnail ? (
@@ -49,7 +49,7 @@ export default function JobCard({ item }) {
         </View>
       </View>
 
-      {/* 3. MIDDLE CHIPS */}
+      
       <View style={[globalStyles.chipContainer, { marginTop: SPACING.sm }]}>
         <View style={globalStyles.chip}>
           <Text style={globalStyles.chipText}>
@@ -63,7 +63,7 @@ export default function JobCard({ item }) {
         </View>
       </View>
 
-      {/* 4. FOOTER STATS COMPONENT */}
+      
       <View style={[globalStyles.rowBetween, { marginTop: SPACING.md, paddingTop: SPACING.sm, borderTopWidth: 1, borderColor: COLORS.surface }]}>
         <Text style={globalStyles.bodyText, { fontSize: 12 }}>⏳ Hạn: {formatDate(item.expiry_date)}</Text>
         <Text style={globalStyles.bodyText, { fontSize: 12 }}>👥 Tuyển: {item.slot} | Nộp: {item.application_count}</Text>

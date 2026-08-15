@@ -6,14 +6,14 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 export const chatService = {
-    // 1. TẠO ID PHÒNG CHAT
+    
     getRoomId: (username1, username2) => {
         if (!username1 || !username2) return "phong-chat-loi";
         const sortedUsernames = [username1, username2].sort();
-        return `${sortedUsernames[0]}|${sortedUsernames[1]}`; // Phân cách bằng dấu |
+        return `${sortedUsernames[0]}|${sortedUsernames[1]}`; 
     },
 
-    // 2. GỬI TIN NHẮN
+    
     sendMessage: async (roomId, messages = [], usersArray = [], currentUserInfo, targetUserInfo) => {
         const msg = messages[0];
         const messagesRef = collection(db, 'chatRooms', roomId, 'messages');
@@ -27,7 +27,7 @@ export const chatService = {
             lastMessage: msg.text,
             lastUpdatedAt: serverTimestamp(),
             users: usersArray,
-            // 👇 NHÉT THÊM CỤC INFO NÀY VÀO ĐỂ LIST CHAT ĐỌC
+            
             usersInfo: {
                 [currentUserInfo.username]: { name: currentUserInfo.name, avatar: currentUserInfo.avatar },
                 [targetUserInfo.username]: { name: targetUserInfo.name, avatar: targetUserInfo.avatar }
@@ -35,7 +35,7 @@ export const chatService = {
         }, { merge: true });
     },
 
-    // 3. LẮNG NGHE TIN NHẮN REAL-TIME
+    
     subscribeToMessages: (roomId, callback) => {
         const messagesRef = collection(db, 'chatRooms', roomId, 'messages');
         const q = query(messagesRef, orderBy('createdAt', 'desc'));
@@ -56,7 +56,7 @@ export const chatService = {
         return unsubscribe;
     },
 
-    // 4. LẤY DANH SÁCH CÁC PHÒNG CHAT CỦA USER
+    
     subscribeToChatRooms: (currentUsername, callback) => {
         const roomsRef = collection(db, 'chatRooms');
         const q = query(roomsRef, where('users', 'array-contains', currentUsername));

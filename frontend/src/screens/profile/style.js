@@ -19,7 +19,7 @@ export const styles = StyleSheet.create({
   actionButton: { marginTop: SPACING.md, paddingHorizontal: 28, paddingVertical: 8, borderRadius: RADIUS.sm, borderWidth: 1, borderColor: COLORS.border || '#E5E7EB', backgroundColor: COLORS.surface || '#F3F4F6' },
   actionButtonText: { fontSize: FONTSIZE.sm, fontWeight: FONTWEIGHT.bold, color: COLORS.textPrimary || '#111111' },
 
-  // Custom Tabbar
+  
   tabBarContainer: { flexDirection: 'row', borderBottomWidth: 1, borderColor: COLORS.border || '#E5E7EB', backgroundColor: COLORS.background || '#FFFFFF' },
   tabItem: { flex: 1, alignItems: 'center', paddingVertical: SPACING.md },
   activeTabItem: { borderBottomWidth: 2, borderColor: COLORS.textPrimary || '#111111' },
@@ -27,7 +27,7 @@ export const styles = StyleSheet.create({
   activeTabLabel: { color: COLORS.textPrimary || '#111111', fontWeight: FONTWEIGHT.bold },
   tabContentContainer: { flex: 1, padding: SPACING.md },
 
-  // Cards
+  
   itemCard: { backgroundColor: COLORS.background || '#FFFFFF', borderRadius: RADIUS.md, padding: SPACING.md, marginBottom: SPACING.md, borderWidth: 1, borderColor: COLORS.border || '#E5E7EB' },
   itemTitle: { fontSize: FONTSIZE.md, fontWeight: FONTWEIGHT.bold, color: COLORS.textPrimary || '#111111' },
   itemSubText: { fontSize: FONTSIZE.xs, color: COLORS.textSecondary || '#6B7280', marginTop: 4 },
@@ -35,7 +35,7 @@ export const styles = StyleSheet.create({
   createCard: { borderWidth: 1, borderStyle: 'dashed', borderColor: '#9CA3AF', borderRadius: RADIUS.md, padding: SPACING.md, justifyContent: 'center', alignItems: 'center', flexDirection: 'row', gap: 8, backgroundColor: COLORS.background || '#FFFFFF' },
   createCardText: { fontSize: FONTSIZE.sm, fontWeight: FONTWEIGHT.bold, color: COLORS.textSecondary || '#4B5563' },
 
-  // Reviews
+  
   reviewCard: { backgroundColor: COLORS.surface || '#F9FAFB', borderRadius: RADIUS.md, padding: SPACING.md, marginBottom: SPACING.md, borderWidth: 1, borderColor: COLORS.border || '#E5E7EB' },
   reviewHeader: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 8 },
   reviewAvatar: { width: 36, height: 36, borderRadius: 18 },
@@ -46,7 +46,7 @@ export const styles = StyleSheet.create({
   unverifiedBox: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 32, marginTop: 20 },
   unverifiedText: { fontSize: FONTSIZE.sm, color: COLORS.textSecondary || '#6B7280', textAlign: 'center', lineHeight: 22, marginBottom: 20 },
 
-  // Badges Resume màu chuẩn mới
+  
   badgeBase: { paddingHorizontal: 12, paddingVertical: 4, borderRadius: 99, justifyContent: 'center', alignItems: 'center' },
   badgeDraft: { backgroundColor: '#de9e4a' },
   badgePublic: { backgroundColor: '#4ADE80' },

@@ -68,7 +68,7 @@ class CandidateProfile(models.Model):
         return self.user.username
 
 class EmployerProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='employer_profile')
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     company_name = models.CharField(max_length=250, null=True, blank=True)
     tax_code = models.CharField(max_length=50, unique=True, null=True,blank=True)
     is_verified = models.BooleanField(default=False)

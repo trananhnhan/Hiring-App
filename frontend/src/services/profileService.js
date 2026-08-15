@@ -85,7 +85,7 @@ export const profileServices = {
         return response.data;
     },
 
-    // 2. Cập nhật User Auth (Có gửi File Avatar nên phải dùng FormData)
+    
     updateUser: async (formData) => {
         const response = await api.patch(endpoints.users.currentUser, formData, {
             headers: { 'Content-Type': 'multipart/form-data' }
@@ -93,13 +93,13 @@ export const profileServices = {
         return response.data;
     },
     
-    // 3. Cập nhật Candidate Profile (Chỉ gửi text nên dùng JSON bình thường)
+    
     updateCandidateProfile: async (payload) => {
         const response = await api.patch(endpoints.candidateProfile.me, payload);
         return response.data;
     },
 
-    // 4. Cập nhật Employer Profile (Chỉ gửi text nên dùng JSON)
+    
     updateEmployerProfile: async (payload) => {
         const response = await api.patch(endpoints.employerProfile.me, payload);
         return response.data;

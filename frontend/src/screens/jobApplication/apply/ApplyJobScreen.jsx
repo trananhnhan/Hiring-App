@@ -21,11 +21,11 @@ export default function ApplyJobScreen() {
     const insets = useSafeAreaInsets();
     const { user: currentUser } = useContext(AuthContext);
 
-    // ✅ Nhận thêm biến application nếu là luồng SỬA ĐƠN (PATCH)
+    
     const { jobUuid, jobTitle, companyName, application } = route.params || {};
-    const isEditMode = !!application; // Nếu có object application truyền sang -> Mode Sửa
+    const isEditMode = !!application; 
 
-    // --- STATE QUẢN LÝ CV PHÂN TRANG VÔ HẠN ---
+    
     const [resumes, setResumes] = useState([]);
     const [selectedResumeId, setSelectedResumeId] = useState(null);
     const [resumePage, setResumePage] = useState(1);
@@ -33,7 +33,7 @@ export default function ApplyJobScreen() {
     const [loadingResumes, setLoadingResumes] = useState(true);
     const [loadingMoreResumes, setLoadingMoreResumes] = useState(false);
 
-    // ✅ Đổ data cũ nếu ở Mode Sửa
+    
     const [message, setMessage] = useState(isEditMode ? application.message : '');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [modalConfig, setModalConfig] = useState({ visible: false, type: 'info', title: '', message: '' });
@@ -56,9 +56,9 @@ export default function ApplyJobScreen() {
             setResumes(prev => isRefresh ? formattedResumes : [...prev, ...formattedResumes]);
             setHasMoreResumes(data?.next !== null);
 
-            // Set CV mặc định
+            
             if (isRefresh && formattedResumes.length > 0) {
-                // ✅ Nếu đang sửa, ưu tiên chọn đúng cái CV cũ đã nộp của đơn này
+                
                 if (isEditMode && application?.resume?.uuid) {
                     setSelectedResumeId(application.resume.uuid);
                 } else {
@@ -104,7 +104,7 @@ export default function ApplyJobScreen() {
   
                 await jobApplicationServices.updateApplication(application.uuid, updatePayload);
             } else {
-                // 🆕 LUỒNG TẠO MỚI: Bắn lệnh POST
+                
                 await jobApplicationServices.applyForJob(jobUuid, selectedResumeId, message);
             }
 
@@ -115,7 +115,7 @@ export default function ApplyJobScreen() {
                 message: isEditMode ? 'Đơn ứng tuyển đã được chỉnh sửa.' : 'CV đã được gửi tới nhà tuyển dụng.',
                 onCloseOverride: () => {
                     setModalConfig(prev => ({ ...prev, visible: false }));
-                    // Điểm mấu chốt: goBack về để màn hình Detail tự refresh data mới
+                    
                     navigation.goBack();
                 }
             });
@@ -132,14 +132,14 @@ export default function ApplyJobScreen() {
         }
     };
 
-    // Bốc thông tin hiển thị (Lấy từ params hoặc bốc từ đơn cũ qua)
+    
     const displayJobTitle = isEditMode ? application?.job_post?.title : jobTitle;
     const displayCompanyName = isEditMode ? application?.employer?.company_name : companyName;
 
     return (
         <View style={[globalStyles.container, { backgroundColor: '#F9FAFB' }]}>
 
-            {/* HEADER */}
+            
             <View style={[styles.header, { paddingTop: Math.max(insets.top, 24) + 12 }]}>
                 <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
                     <Ionicons name="close" size={24} color="#111111" />
@@ -150,7 +150,7 @@ export default function ApplyJobScreen() {
 
             <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
 
-                {/* KHỐI TÓM TẮT THÔNG TIN JOB */}
+                
                 <View style={styles.infoCard}>
                     <Text style={styles.sectionLabel}>Vị trí ứng tuyển:</Text>
                     <Text style={styles.jobTitle}>{displayJobTitle || 'Vị trí ẩn danh'}</Text>
@@ -160,7 +160,7 @@ export default function ApplyJobScreen() {
                     </View>
                 </View>
 
-                {/* KHỐI CHỌN CV */}
+                
                 <View style={styles.formGroup}>
                     <Text style={styles.inputLabel}>Chọn Hồ sơ (CV) của bạn <Text style={{ color: 'red' }}>*</Text></Text>
                     {loadingResumes ? (
@@ -184,7 +184,7 @@ export default function ApplyJobScreen() {
                     )}
                 </View>
 
-                {/* KHỐI NHẬP LỜI CHÀO MỜI */}
+                
                 <View style={styles.formGroup}>
                     <Text style={styles.inputLabel}>Lời chào / Thư ngỏ (Tùy chọn)</Text>
                     <TextInput
@@ -201,7 +201,7 @@ export default function ApplyJobScreen() {
 
             </ScrollView>
 
-            {/* FOOTER ACTION */}
+            
             <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 24) }]}>
                 <AppButton
                     title={isSubmitting ? "Đang xử lý..." : (isEditMode ? "Cập Nhật Đơn" : "Gửi Đơn Ứng Tuyển")}

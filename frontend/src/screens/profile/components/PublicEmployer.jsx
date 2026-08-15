@@ -118,11 +118,11 @@ export default function PublicEmployer({ profile, insets, isFocused }) {
                 <Text style={styles.bioText}>{profile.company_description || 'Chưa cập nhật giới thiệu công ty.'}</Text>
                 <Text style={[styles.ageText, { fontWeight: 'bold' }]}> {profile.company_name}</Text>
                 
-                {/* ✅ KHU VỰC ĐIỀU HƯỚNG HIỂN THỊ DỰA TRÊN ROLE */}
+                
                 <View style={{ marginTop: 12, alignItems: 'center' }}>
                   
                   {currentUser?.role === 'CANDIDATE' && !profile.is_owner ? (
-                    // TRƯỜNG HỢP 1: Ứng viên xem Doanh nghiệp -> Đếm ở trên, 2 Nút ở dưới
+                    
                     <>
                       <TouchableOpacity 
                         style={[styles.statItem, { marginBottom: 12, alignItems: 'center' }]} 
@@ -156,10 +156,10 @@ export default function PublicEmployer({ profile, insets, isFocused }) {
                       </View>
                     </>
                   ) : (
-                    // TRƯỜNG HỢP 2: Employer xem Employer, hoặc Tự xem trang cá nhân -> Cùng 1 hàng ngang - CHIA ĐÔI TÂM TUYỆT ĐỐI
+                    
                     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
                       
-                      {/* Nửa bên trái */}
+                      
                       <View style={{ flex: 1, alignItems: profile.is_owner ? 'center' : 'flex-end', paddingRight: profile.is_owner ? 0 : 12 }}>
                         <TouchableOpacity 
                           style={[styles.statItem, { alignItems: 'center', justifyContent: 'center', marginTop: 0, marginBottom: 0 }]} 
@@ -170,7 +170,7 @@ export default function PublicEmployer({ profile, insets, isFocused }) {
                         </TouchableOpacity>
                       </View>
 
-                      {/* Nửa bên phải */}
+                      
                       {!profile.is_owner && (
                         <View style={{ flex: 1, alignItems: 'flex-start', paddingLeft: 12 }}>
                           <TouchableOpacity 

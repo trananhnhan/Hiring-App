@@ -2,7 +2,7 @@ import { StyleSheet } from 'react-native';
 import { COLORS, SPACING, FONTSIZE, FONTWEIGHT } from '../../../constants/theme';
 
 export const styles = StyleSheet.create({
-  // Cụm Header
+  
   headerContainer: {
     marginBottom: SPACING.xxl, 
     alignItems: 'center'
@@ -10,16 +10,16 @@ export const styles = StyleSheet.create({
   title: {
     fontSize: FONTSIZE.xxl, 
     fontWeight: FONTWEIGHT.bold,
-    color: COLORS.textPrimary // Bổ sung màu cho chắc chắn
+    color: COLORS.textPrimary 
   },
   subtitle: {
     color: COLORS.textSecondary
   },
 
-  // Cụm Form nhập liệu
+  
   formContainer: {
     marginBottom: SPACING.xl, 
-    alignSelf: 'stretch' // Kéo giãn input ra 2 bên
+    alignSelf: 'stretch' 
   },
   forgotPasswordWrap: {
     alignItems: 'flex-end', 
@@ -30,7 +30,7 @@ export const styles = StyleSheet.create({
     fontWeight: FONTWEIGHT.medium
   },
 
-  // Cụm Footer
+  
   registerText: {
     color: COLORS.primary, 
     fontWeight: FONTWEIGHT.bold

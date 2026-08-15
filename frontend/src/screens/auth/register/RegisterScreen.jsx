@@ -41,7 +41,7 @@ export const RegisterScreen = () => {
         }
 
         const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ['images'], // Đổi thành mảng chuỗi thế này
+            mediaTypes: ['images'], 
             allowsEditing: true,
             aspect: [1, 1],
             quality: 0.5,
@@ -75,7 +75,7 @@ export const RegisterScreen = () => {
             formData.append('last_name', lastName);
 
             if (avatar) {
-                // Trích xuất tên file và định dạng (extension) từ URI
+                
                 const localUri = avatar;
                 const filename = localUri.split('/').pop();
                 const match = /\.(\w+)$/.exec(filename);
@@ -140,7 +140,7 @@ export const RegisterScreen = () => {
                             </TouchableOpacity>
                         </View>
 
-                        {/* ---> CỤM AVATAR <--- */}
+                        
                         <View style={styles.avatarContainer}>
                             <TouchableOpacity
                                 onPress={handlePickAvatar}
@@ -154,7 +154,7 @@ export const RegisterScreen = () => {
                             </TouchableOpacity>
                         </View>
 
-                        {/* Dùng flex row để Họ và Tên nằm ngang cho gọn */}
+                        
                         <View style={[globalStyles.rowBetween, { gap: 10 }]}>
                             <View style={{ flex: 1 }}>
                                 <AppInput

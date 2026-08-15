@@ -10,7 +10,7 @@ export const AppConfirmModal = ({
   onCancel, 
   confirmText = 'Xác nhận', 
   cancelText = 'Hủy',
-  isDanger = false // Nếu true, nút xác nhận sẽ có màu đỏ (dùng cho việc Xóa, Đăng xuất)
+  isDanger = false 
 }) => {
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancel}>
@@ -20,15 +20,15 @@ export const AppConfirmModal = ({
           <Text style={styles.title}>{title || 'Xác nhận hành động'}</Text>
           <Text style={styles.message}>{message}</Text>
           
-          {/* Cụm 2 nút bấm hàng ngang */}
+          
           <View style={styles.buttonGroup}>
             
-            {/* Nút Hủy bên trái */}
+            
             <TouchableOpacity style={styles.cancelBtn} onPress={onCancel}>
               <Text style={styles.cancelBtnText}>{cancelText}</Text>
             </TouchableOpacity>
 
-            {/* Nút Xác nhận bên phải */}
+            
             <TouchableOpacity 
               style={[styles.confirmBtn, { backgroundColor: isDanger ? '#EF4444' : (COLORS.textPrimary || '#111111') }]} 
               onPress={onConfirm}

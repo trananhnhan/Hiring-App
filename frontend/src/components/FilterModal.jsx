@@ -15,7 +15,7 @@ export const FilterModal = ({ visible, onClose, onApply, currentFilters }) => {
   const [isDistrictLoading, setIsDistrictLoading] = useState(false);
   const [isWardLoading, setIsWardLoading] = useState(false);
 
-  // Lấy dữ liệu Quận/Huyện
+
   const fetchDistricts = async (provinceId) => {
     try {
       setIsDistrictLoading(true);
@@ -28,7 +28,7 @@ export const FilterModal = ({ visible, onClose, onApply, currentFilters }) => {
     }
   };
 
-  // Lấy dữ liệu Phường/Xã
+
   const fetchWards = async (districtId) => {
     try {
       setIsWardLoading(true);
@@ -80,11 +80,11 @@ export const FilterModal = ({ visible, onClose, onApply, currentFilters }) => {
 
     Keyboard.dismiss(); 
 
-    // Bước 2: Đợi bàn phím hạ xuống xong (khoảng 150ms) rồi mới đóng Modal
+   
     setTimeout(() => {
       onClose(); 
 
-      // Bước 3: Đợi Modal trượt xuống xong hoàn toàn (khoảng 250ms) rồi mới đẩy data ra gọi API
+
       setTimeout(() => {
         onApply(finalFilters);
       }, 250);
@@ -102,7 +102,7 @@ export const FilterModal = ({ visible, onClose, onApply, currentFilters }) => {
       <View style={styles.overlay}>
         <View style={styles.bottomSheet}>
 
-          {/* Header */}
+          
           <View style={styles.header}>
             <Text style={styles.title}>Bộ lọc nâng cao</Text>
             <TouchableOpacity onPress={handleCloseWrapper}>
@@ -111,7 +111,7 @@ export const FilterModal = ({ visible, onClose, onApply, currentFilters }) => {
           </View>
 
           <ScrollView style={styles.body} showsVerticalScrollIndicator={false}>
-            {/* Lọc lương - Đã fix lỗi thiết lập lại */}
+            
             <Text style={styles.sectionTitle}>Mức lương mong muốn</Text>
             <AppInput
               keyboardType="numeric"
@@ -119,7 +119,7 @@ export const FilterModal = ({ visible, onClose, onApply, currentFilters }) => {
               onChangeText={(val) => setTempFilters(prev => ({ ...prev, expected_salary: val }))}
             />
 
-            {/* Tỉnh / Thành phố */}
+            
             <Text style={styles.sectionTitle}>Tỉnh / Thành phố</Text>
             <AppDropdown
               data={provinces}
@@ -128,7 +128,7 @@ export const FilterModal = ({ visible, onClose, onApply, currentFilters }) => {
               placeholder="Chọn Tỉnh/Thành phố"
             />
 
-            {/* Quận / Huyện */}
+            
             <Text style={styles.sectionTitle}>Quận / Huyện</Text>
             {isDistrictLoading ? (
               <ActivityIndicator size="small" color={COLORS.primary} style={{ marginVertical: 10 }} />
@@ -142,7 +142,7 @@ export const FilterModal = ({ visible, onClose, onApply, currentFilters }) => {
               />
             )}
 
-            {/* Phường / Xã */}
+            
             <Text style={styles.sectionTitle}>Phường / Xã</Text>
             {isWardLoading ? (
               <ActivityIndicator size="small" color={COLORS.primary} style={{ marginVertical: 10 }} />
@@ -157,7 +157,7 @@ export const FilterModal = ({ visible, onClose, onApply, currentFilters }) => {
               />
             )}
 
-            {/* Nhóm ngành chính */}
+            
             <Text style={styles.sectionTitle}>Nhóm ngành chính</Text>
             <AppDropdown
               data={parentCareers}
@@ -168,7 +168,7 @@ export const FilterModal = ({ visible, onClose, onApply, currentFilters }) => {
               dropdownPosition="top"
             />
 
-            {/* Chuyên ngành chi tiết */}
+            
             <Text style={styles.sectionTitle}>Chuyên ngành chi tiết</Text>
             <AppDropdown
               data={childCareers}
@@ -181,7 +181,7 @@ export const FilterModal = ({ visible, onClose, onApply, currentFilters }) => {
             />
           </ScrollView>
 
-          {/* Footer */}
+          
           <View style={styles.footer}>
             <TouchableOpacity style={styles.resetBtn} onPress={() => setTempFilters({})}>
               <Text style={styles.resetBtnText}>Thiết lập lại</Text>

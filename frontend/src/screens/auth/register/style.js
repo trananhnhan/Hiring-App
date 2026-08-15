@@ -1,12 +1,12 @@
 import { StyleSheet } from 'react-native';
-// Lấy chuẩn xác các hằng số từ bộ theme của bạn
+
 import { COLORS, SPACING, FONTSIZE, FONTWEIGHT, RADIUS } from '../../../constants/theme';
 
 export const styles = StyleSheet.create({
     headerContainer: {
         marginBottom: SPACING.xl,
         alignItems: 'center',
-        marginTop: SPACING.xl, // Đẩy xuống một chút cho thoáng
+        marginTop: SPACING.xl, 
     },
     title: {
         fontSize: FONTSIZE.xxl,
@@ -35,11 +35,11 @@ export const styles = StyleSheet.create({
         flex: 1,
         paddingVertical: SPACING.sm,
         alignItems: 'center',
-        borderRadius: RADIUS.lg, // Bo góc nhỏ hơn thằng cha (roleContainer) một chút
+        borderRadius: RADIUS.lg, 
     },
     roleButtonActive: {
-        backgroundColor: COLORS.primary, // Đen tuyền #0A0A0A
-        // Đổ bóng nhẹ để cục màu đen nổi lên trên nền xám
+        backgroundColor: COLORS.primary, 
+        
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.1,
@@ -49,16 +49,16 @@ export const styles = StyleSheet.create({
     roleText: {
         fontSize: FONTSIZE.sm,
         fontWeight: FONTWEIGHT.medium,
-        color: COLORS.textSecondary, // Chữ xám cho role chưa chọn
+        color: COLORS.textSecondary, 
     },
     roleTextActive: {
-        color: COLORS.textInverse, // Chữ trắng trên nền đen
+        color: COLORS.textInverse, 
         fontWeight: FONTWEIGHT.bold,
     },
     /* -------------------------------------------------------- */
 
     errorText: {
-        color: COLORS.error, // #C62828
+        color: COLORS.error, 
         fontSize: FONTSIZE.sm,
         marginBottom: SPACING.md,
         textAlign: 'center',

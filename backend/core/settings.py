@@ -21,7 +21,7 @@ environ.Env.read_env(BASE_DIR / '.env')
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-zy=1^3!bh62#%^xb&it_2a@@di&g5m5bek%%0+@we&06rc@t)8'
+SECRET_KEY = env('DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -30,7 +30,8 @@ ALLOWED_HOSTS = [
     '192.168.1.230',
     '127.0.0.1',
     '192.168.1.222',
-    '192.168.1.234'
+    '192.168.1.234',
+    '10.232.222.163'
 ]
 
 
@@ -59,8 +60,8 @@ INSTALLED_APPS = [
 ]
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework.authentication.SessionAuthentication',
         'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
+        'rest_framework.authentication.SessionAuthentication',
     )
 }
 

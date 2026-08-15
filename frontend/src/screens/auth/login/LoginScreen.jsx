@@ -55,13 +55,13 @@ export const LoginScreen = () => {
     <AppScreenWrapper>
       <View style={[globalStyles.centerAll,globalStyles.content,]}>
         
-        {/* header*/}
+        
         <View style={[styles.headerContainer, ]}> 
           <Text style={styles.title}>{APP_NAME}</Text>
           <Text style={styles.subtitle}>Đăng nhập để tiếp tục</Text>
         </View>
 
-        {/* form */}
+        
         <View style={[styles.formContainer, ]}> 
           <AppInput
             label="Username"
@@ -99,7 +99,7 @@ export const LoginScreen = () => {
           />
         </View>
 
-        {/* footer*/}
+        
         <View style={[globalStyles.rowCenter, ]}>
           <Text style={styles.subtitle}>Bạn chưa có tài khoản? </Text>
           <TouchableOpacity onPress={() => navigation.navigate('Register')}>

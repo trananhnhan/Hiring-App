@@ -12,21 +12,16 @@ import { styles } from '../style';
 import ResumeDetailScreen from '../../resume/detail/ResumeDetailScreen';
 import CreateEditResumeScreen from '../../resume/createEdit/CreateEditResumeScreen';
 
-
-
-
 export default function OwnerCandidate({ profile, insets, isFocused }) {
   const navigation = useNavigation();
   const [activeTab, setActiveTab] = useState('tab1');
 
-  // --- HỆ THỐNG STATE QUẢN LÝ PHÂN TRANG VÔ HẠN ---
   const [listData, setListData] = useState([]);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
 
-  // Lấy số lượng Đang theo dõi ở khối Header
   const [followingCount, setFollowingCount] = useState(0);
   useEffect(() => {
     api.get(`/candidate-profiles/${profile.user?.username}/following/`)
@@ -34,7 +29,6 @@ export default function OwnerCandidate({ profile, insets, isFocused }) {
       .catch(() => {});
   }, [profile.user?.username,isFocused]);
 
-  // Hàm cốt lõi chịu trách nhiệm bốc dữ liệu theo trang và nối mảng động theo từng Tab
   const loadData = async (pageToLoad, isRefresh = false) => {
     if (pageToLoad === 1) setIsInitialLoading(true);
     else setIsLoadingMore(true);
@@ -51,7 +45,6 @@ export default function OwnerCandidate({ profile, insets, isFocused }) {
 
       const newItems = responseData?.results || [];
       
-      // Nối mảng cộng dồn nếu cuộn xuống, hoặc thay mới hoàn toàn nếu đổi Tab / Refresh
       setListData(prev => isRefresh ? newItems : [...prev, ...newItems]);
       setHasMore(responseData?.next !== null);
     } catch (err) {
@@ -62,7 +55,6 @@ export default function OwnerCandidate({ profile, insets, isFocused }) {
     }
   };
 
-  // Kích hoạt reset và tải lại từ đầu mỗi khi ứng viên bấm chuyển Tab con
   useEffect(() => {
     setListData([]);
     setPage(1);
@@ -70,7 +62,6 @@ export default function OwnerCandidate({ profile, insets, isFocused }) {
     loadData(1, true);
   }, [activeTab,isFocused]);
 
-  // Nhận diện chạm đáy để tăng page và kích nạp trang tiếp theo
   const handleLoadMore = () => {
     if (!isInitialLoading && !isLoadingMore && hasMore) {
       const nextPage = page + 1;
@@ -79,9 +70,8 @@ export default function OwnerCandidate({ profile, insets, isFocused }) {
     }
   };
 
-  // Hàm Render thẻ Card thông minh phân rã theo loại dữ liệu của từng Tab
   const renderItemCard = ({ item, index }) => {
-    // TAB 1: DANH SÁCH HỒ SƠ CV
+    
     if (activeTab === 'tab1') {
       let badgeStyle = styles.badgePublic;
       if (item.status === 'DRAFT') badgeStyle = styles.badgeDraft;
@@ -99,20 +89,16 @@ export default function OwnerCandidate({ profile, insets, isFocused }) {
       );
     }
 
-// TAB 2: DANH SÁCH ĐƠN ỨNG TUYỂN (CÓ CHỨA TRANG PHÂN KỲ)
     if (activeTab === 'tab2') {
-      // Bổ sung thêm trạng thái REVIEWING cho đủ bộ
       const resultColors = { 'PENDING': '#F59E0B', 'REVIEWING': '#3B82F6', 'ACCEPTED': '#10B981', 'REJECTED': '#EF4444' };
       const resultTexts = { 'PENDING': 'Đang chờ duyệt', 'REVIEWING': 'Đang xem xét', 'ACCEPTED': 'Đã trúng tuyển', 'REJECTED': 'Từ chối' };
 
       return (
-        // ✅ THAY <View> BẰNG <TouchableOpacity> ĐỂ BẤM ĐƯỢC TOÀN BỘ CARD
         <TouchableOpacity 
           style={styles.itemCard}
-          activeOpacity={0.7} // Hiệu ứng mờ nhẹ khi bấm
+          activeOpacity={0.7} 
           onPress={() => navigation.navigate('ApplicationDetailScreen', { applicationUuid: item.uuid })}
         >
-          {/* NÚT BẤM BÊN TRONG: Bấm riêng vào Tên Job thì sang màn Job Detail */}
           <TouchableOpacity onPress={() => navigation.navigate('JobDetail', { jobUuid: item.job_post?.uuid })}>
             <Text style={[styles.itemTitle, { color: '#3B82F6' }]}>💼 {item.job_post?.title}</Text>
           </TouchableOpacity>
@@ -128,12 +114,10 @@ export default function OwnerCandidate({ profile, insets, isFocused }) {
               </Text>
             </View>
           </View>
-          
         </TouchableOpacity>
       );
     }
 
-    // TAB 3: DANH SÁCH ĐÁNH GIÁ NHẬN ĐƯỢC
     return <ReviewCard item={item} />;
   };
 
@@ -148,7 +132,7 @@ export default function OwnerCandidate({ profile, insets, isFocused }) {
 
   return (
     <View style={styles.container}>
-      {/* KHỐI ĐỈNH HEADER PROFILE */}
+      
       <View style={[styles.headerContainer, { top: insets.top }]}>
         <TouchableOpacity style={[styles.settingsButton, { top: insets.top -50 }]} onPress={() => navigation.navigate('SettingsScreen')}>
           <Ionicons name="settings-outline" size={22} color="#111111" />
@@ -160,23 +144,24 @@ export default function OwnerCandidate({ profile, insets, isFocused }) {
         <Text style={styles.bioText}>{profile.bio || 'Chưa cập nhật giới thiệu.'}</Text>
         <Text style={styles.ageText}>Khoảng {profile.approximate_age || 21} tuổi 🕵️‍♂️</Text>
         
-        <View style={styles.statsRow}>
-          <TouchableOpacity style={styles.statItem} onPress={() => navigation.navigate('FollowListScreen', { type: 'following', username: profile.user?.username })}>
-            <Text style={styles.statNumber}>{followingCount}</Text>
-            <Text style={styles.statLabel}>Đang theo dõi</Text>
+
+        <View style={[styles.statsRow, { alignItems: 'center', justifyContent: 'center', paddingVertical: 12, marginBottom: 16 }]}>
+          <TouchableOpacity 
+            style={[styles.statItem, { alignItems: 'center', justifyContent: 'center', minHeight: 50 }]} 
+            onPress={() => navigation.navigate('FollowListScreen', { type: 'following', username: profile.user?.username })}
+          >
+            <Text style={[styles.statNumber, { fontSize: 18, fontWeight: 'bold', color: '#111111' }]}>{followingCount}</Text>
+            <Text style={[styles.statLabel, { fontSize: 13, color: '#6B7280', marginTop: 4 }]}>Đang theo dõi</Text>
           </TouchableOpacity>
         </View>
-        <TouchableOpacity style={styles.actionButton} onPress={() => navigation.navigate('EditProfileForm')}><Text style={styles.actionButtonText}>Chỉnh sửa hồ sơ</Text></TouchableOpacity>
       </View>
 
-      {/* THANH ĐIỀU HƯỚNG TABS CON */}
       <View style={styles.tabBarContainer}>
         <TouchableOpacity style={[styles.tabItem, activeTab === 'tab1' && styles.activeTabItem]} onPress={() => setActiveTab('tab1')}><Text style={[styles.tabLabel, activeTab === 'tab1' && styles.activeTabLabel]}>Hồ sơ CV</Text></TouchableOpacity>
         <TouchableOpacity style={[styles.tabItem, activeTab === 'tab2' && styles.activeTabItem]} onPress={() => setActiveTab('tab2')}><Text style={[styles.tabLabel, activeTab === 'tab2' && styles.activeTabLabel]}>Đơn ứng tuyển</Text></TouchableOpacity>
         <TouchableOpacity style={[styles.tabItem, activeTab === 'tab3' && styles.activeTabItem]} onPress={() => setActiveTab('tab3')}><Text style={[styles.tabLabel, activeTab === 'tab3' && styles.activeTabLabel]}>Đánh giá</Text></TouchableOpacity>
       </View>
 
-      {/* KHỐI NỘI DUNG FLATLIST INFINITE SCROLL */}
       <View style={styles.tabContentContainer}>
         {isInitialLoading ? (
           <ActivityIndicator size="small" color="#111111" style={{ marginTop: 20 }} />
@@ -187,7 +172,6 @@ export default function OwnerCandidate({ profile, insets, isFocused }) {
             renderItem={renderItemCard}
             showsVerticalScrollIndicator={false}
             
-            // Đẩy nút tạo CV lên đầu danh sách của Tab 1
             ListHeaderComponent={
               activeTab === 'tab1' ? (
                 <TouchableOpacity style={[styles.createCard, { marginBottom: 16 }]} onPress={() => navigation.navigate('CreateEditResumeScreen')}>

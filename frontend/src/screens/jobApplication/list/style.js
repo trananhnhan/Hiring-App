@@ -16,7 +16,7 @@ export const styles = StyleSheet.create({
   headerTitle: { fontSize: FONTSIZE.lg, fontWeight: FONTWEIGHT.bold, color: '#111111' },
   listContainer: { padding: SPACING.md },
   
-  // Trả lại Card nguyên khối như cũ
+  
   candidateCard: {
     flexDirection: 'row',
     alignItems: 'center',

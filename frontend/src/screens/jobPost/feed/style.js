@@ -60,12 +60,12 @@ export const styles = StyleSheet.create({
   },
 
   searchInputWrapper: {
-    flex: 1, // Chiếm hết không gian còn lại
-    marginBottom: 0, // Ghi đè marginBottom của AppInput để canh giữa với nút Filter
+    flex: 1, 
+    marginBottom: 0, 
   },
   filterButton: {
     backgroundColor: COLORS.textSecondary,
-    height: 50, // Cùng chiều cao với AppInput mặc định
+    height: 50, 
     paddingHorizontal: SPACING.md,
     justifyContent: 'center',
     alignItems: 'center',

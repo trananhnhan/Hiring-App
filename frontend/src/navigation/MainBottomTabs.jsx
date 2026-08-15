@@ -27,11 +27,6 @@ export default function MainBottomTabs() {
           let iconName;
           if (route.name === 'Home') iconName = focused ? 'home' : 'home-outline';
           else if (route.name === 'Search') iconName = focused ? 'search' : 'search-outline';
-          else if (route.name === 'Action') {
-            iconName = isEmployer 
-                ? (focused ? 'add-circle' : 'add-circle-outline') 
-                : (focused ? 'briefcase' : 'briefcase-outline');
-          }
           else if (route.name === 'Chat') iconName = focused ? 'chatbubble-ellipses' : 'chatbubble-ellipses-outline';
           else if (route.name === 'Profile') iconName = focused ? 'person' : 'person-outline';
 

@@ -4,7 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
-// ✅ ĐÃ SỬA: Import service chuẩn
+
 import { profileServices } from '../../services/profileService'; 
 import { globalStyles } from '../../constants/globalStyles';
 import { styles } from './style'; 
@@ -43,7 +43,7 @@ export default function SearchScreen() {
     else setLoadingMore(true);
 
     try {
-      // Gọi service lấy data đã được parse
+      
       const responseData = await profileServices.searchUsers(searchQuery, pageNum);
       const newItems = responseData?.results || [];
       

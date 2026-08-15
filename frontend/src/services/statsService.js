@@ -1,5 +1,5 @@
-// src/services/statsService.js
-import api from './api'; // 🚨 Nhớ sửa lại đường dẫn import file axios của bồ (nếu cần)
+
+import api from './api'; 
 import { endpoints } from '../constants/endpoints';
 
 export const statsService = {

@@ -1,4 +1,4 @@
-// constants/theme.js
+
 
 export const COLORS = {
   background: '#FFFFFF',

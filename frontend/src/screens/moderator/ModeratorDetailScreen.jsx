@@ -21,8 +21,8 @@ export default function ModeratorDetailScreen() {
     const [loading, setLoading] = useState(true);
     const [isVerifying, setIsVerifying] = useState(false);
     
-    // Modal state
-    const [confirmAction, setConfirmAction] = useState(null); // 'ACCEPTED' hoặc 'REJECTED'
+    
+    const [confirmAction, setConfirmAction] = useState(null); 
     const [alertConfig, setAlertConfig] = useState({ visible: false, type: 'info', title: '', message: '' });
 
     useEffect(() => {
@@ -58,7 +58,7 @@ export default function ModeratorDetailScreen() {
 
     return (
         <View style={[globalStyles.container, { backgroundColor: '#F9FAFB' }]}>
-            {/* HEADER */}
+            
             <View style={[styles.header, { paddingTop: Math.max(insets.top, 24) + 12 }]}>
                 <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn} disabled={isVerifying}>
                     <Ionicons name="arrow-back" size={24} color="#111111" />
@@ -68,7 +68,7 @@ export default function ModeratorDetailScreen() {
             </View>
 
             <ScrollView contentContainerStyle={{ padding: 16 }} showsVerticalScrollIndicator={false}>
-                {/* THÔNG TIN CHUNG */}
+                
                 <View style={styles.card}>
                     <Text style={{ fontSize: 15, color: '#374151' }}>
                         Trạng thái: <Text style={{ fontWeight: 'bold', color: isPending ? '#D97706' : (detail?.status === 'ACCEPTED' ? '#059669' : '#DC2626') }}>{detail?.status}</Text>
@@ -76,7 +76,7 @@ export default function ModeratorDetailScreen() {
                     <Text style={{ fontSize: 14, color: '#6B7280', marginTop: 8 }}>Ngày nộp: {formatDate(detail?.created_date)}</Text>
                 </View>
 
-                {/* DANH SÁCH ẢNH CHỨNG TỪ (HIỂN THỊ TO) */}
+                
                 <View style={styles.card}>
                     <Text style={{ fontSize: 15, fontWeight: 'bold', marginBottom: 16, color: '#111' }}>
                         Ảnh chứng từ ({detail?.images?.length || 0}):
@@ -85,12 +85,12 @@ export default function ModeratorDetailScreen() {
                     <View style={styles.imageGrid}>
                         {detail?.images?.map((img, index) => (
                             <View key={img.uuid} style={styles.imageBox}>
-                                {/* Đánh số thứ tự ảnh */}
+                                
                                 <View style={styles.imageBadge}>
                                     <Text style={styles.imageBadgeText}>{index + 1}/{detail?.images?.length}</Text>
                                 </View>
                                 
-                                {/* Đổi resizeMode="contain" để ảnh không bị cắt mất chữ */}
+                                
                                 <Image source={{ uri: img.image }} style={styles.imgPreview} resizeMode="contain" />
                             </View>
                         ))}
@@ -98,7 +98,7 @@ export default function ModeratorDetailScreen() {
                 </View>
             </ScrollView>
 
-            {/* HAI NÚT HÀNH ĐỘNG: CHỈ HIỆN KHI ĐANG PENDING */}
+            
             {isPending && (
                 <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 16) }]}>
                     <AppButton 
@@ -119,7 +119,7 @@ export default function ModeratorDetailScreen() {
                 </View>
             )}
 
-            {/* MODAL XÁC NHẬN */}
+            
             <AppConfirmModal 
                 visible={!!confirmAction} 
                 title={confirmAction === 'ACCEPTED' ? 'Xác nhận DUYỆT' : 'Xác nhận TỪ CHỐI'} 
@@ -142,13 +142,13 @@ const styles = StyleSheet.create({
     backBtn: { padding: 4 },
     card: { backgroundColor: '#FFFFFF', padding: 16, borderRadius: 12, borderWidth: 1, borderColor: '#E5E7EB', marginBottom: 16 },
     
-    // ĐÃ SỬA LẠI CSS ĐỂ HIỂN THỊ DỌC VÀ TO
+    
     imageGrid: { flexDirection: 'column', gap: 20 }, 
     imageBox: { 
         width: '100%', 
-        height: 380, // Tăng chiều cao lên để soi cho sướng
+        height: 380, 
         borderRadius: 8, 
-        backgroundColor: '#1F2937', // Nền tối làm nổi bật giấy tờ màu trắng
+        backgroundColor: '#1F2937', 
         position: 'relative',
         overflow: 'hidden'
     },

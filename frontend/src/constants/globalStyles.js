@@ -75,7 +75,7 @@ export const globalStyles = StyleSheet.create({
         backgroundColor: COLORS.surface,
         paddingHorizontal: 12,
         paddingVertical: 6,
-        borderRadius: 99, // Bo tròn trịa luôn
+        borderRadius: 99, 
         borderColor: COLORS.border,
         borderWidth: 1,
     },

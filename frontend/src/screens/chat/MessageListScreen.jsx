@@ -24,13 +24,13 @@ export default function MessageListScreen() {
 const renderChatRoom = ({ item }) => {
         const otherUsername = item.users.find(u => u !== currentUser.username);
         
-        // 👇 Lấy thông tin Tên và Avatar thật từ cục usersInfo trên Firebase
+        
         const targetInfo = item.usersInfo ? item.usersInfo[otherUsername] : null;
 
         const targetUser = { 
             username: otherUsername, 
             name: targetInfo?.name || otherUsername, 
-            avatar: targetInfo?.avatar || "https://via.placeholder.com/150" // Nếu không có thì xài ảnh trắng
+            avatar: targetInfo?.avatar || 'https://via.placeholder.com/150'
         };
 
         return (

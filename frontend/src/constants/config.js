@@ -1,6 +1,6 @@
 export const APP_NAME = 'W-123'
 
-export const BASE_URL = 'http://192.168.1.234:8000'
+export const BASE_URL = 'http://10.232.222.163:8000'
 
 
 export const STORAGE_KEYS = {

@@ -44,7 +44,7 @@ export const AuthProvider = ({ children }) => {
        setLogout(logout)
     },[])
     
-    // save token, get user context
+    
     const onLoginSuccess = async (accessToken,refreshToken) =>{
         try {
             setIsLoading(true);

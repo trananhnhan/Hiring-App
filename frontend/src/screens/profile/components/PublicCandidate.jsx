@@ -112,10 +112,10 @@ export default function PublicCandidate({ profile, insets, isFocused }) {
                 <Text style={styles.bioText}>{profile.bio || 'Chưa cập nhật giới thiệu.'}</Text>
                 <Text style={styles.ageText}>Khoảng {profile.approximate_age || 21} tuổi 🕵️‍♂️</Text>
 
-                {/* ✅ CHIA ĐÔI MÀN HÌNH ĐỂ CÂN BẰNG TÂM TUYỆT ĐỐI */}
+                
                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: 12, width: '100%' }}>
                   
-                  {/* Nửa bên trái */}
+                  
                   <View style={{ flex: 1, alignItems: profile.is_owner ? 'center' : 'flex-end', paddingRight: profile.is_owner ? 0 : 12 }}>
                     <TouchableOpacity 
                       style={[styles.statItem, { alignItems: 'center', justifyContent: 'center', marginTop: 0, marginBottom: 0 }]} 
@@ -126,7 +126,7 @@ export default function PublicCandidate({ profile, insets, isFocused }) {
                     </TouchableOpacity>
                   </View>
 
-                  {/* Nửa bên phải */}
+                  
                   {!profile.is_owner && (
                     <View style={{ flex: 1, alignItems: 'flex-start', paddingLeft: 12 }}>
                       <TouchableOpacity 

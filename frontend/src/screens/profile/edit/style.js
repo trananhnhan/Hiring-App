@@ -44,7 +44,7 @@ export const styles = StyleSheet.create({
         borderRadius: 8, paddingHorizontal: 12, height: 44, fontSize: 15, color: '#111111',
     },
     inputDisabled: {
-        backgroundColor: '#F3F4F6', // Màu xám mờ để báo hiệu không sửa được
+        backgroundColor: '#F3F4F6', 
         borderWidth: 1, borderColor: '#E5E7EB',
         borderRadius: 8, paddingHorizontal: 12, height: 44, fontSize: 15, color: '#6B7280',
     },

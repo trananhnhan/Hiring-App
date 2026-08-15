@@ -17,11 +17,11 @@ export default function CompanyAddressesScreen() {
     const navigation = useNavigation();
     const insets = useSafeAreaInsets();
     
-    // Đọc addresses từ Context
+    
     const { user: currentUser, setUser } = useContext(AuthContext);
     const addresses = currentUser?.profile?.addresses || [];
 
-    // State Xóa
+    
     const [selectedUuid, setSelectedUuid] = useState(null);
     const [isDeleting, setIsDeleting] = useState(false);
     const [alertConfig, setAlertConfig] = useState({ visible: false, type: 'info', title: '', message: '' });
@@ -32,7 +32,7 @@ export default function CompanyAddressesScreen() {
         try {
             await addressService.deleteAddress(selectedUuid);
             
-            // Refresh Context để giật data mới nhất về
+            
             const updatedUser = await profileServices.getMe();
             setUser(updatedUser);
 
@@ -53,7 +53,7 @@ export default function CompanyAddressesScreen() {
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>Cơ sở / Địa chỉ</Text>
                 
-                {/* Nút Tạo Mới trên Header */}
+                
                 <TouchableOpacity onPress={() => navigation.navigate('CreateEditAddressScreen')} disabled={isDeleting}>
                     <Ionicons name="add-circle" size={28} color="#3B82F6" />
                 </TouchableOpacity>
@@ -79,7 +79,7 @@ export default function CompanyAddressesScreen() {
                                 )}
                             </View>
                             
-                            {/* Cột Nút Sửa / Xóa */}
+                            
                             <View style={styles.actionColumn}>
                                 <TouchableOpacity 
                                     style={styles.actionBtn} 

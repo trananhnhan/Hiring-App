@@ -7,7 +7,7 @@ import { AuthNavigator } from './AuthNavigator';
 import { GlobalDataProvider } from '../context/GlobalDataContext';
 import MainStackNavigator from './MainStackNavigator';
 
-// Sắp tạo cái này ở Bước 3
+
 import ModeratorNavigator from './ModeratorNavigator'; 
 
 import { COLORS } from '../constants/theme';
@@ -26,7 +26,7 @@ export const AppNavigator = () => {
   return (
     <NavigationContainer>
       {user ? (
-        // ✅ NẾU LÀ MODERATOR THÌ VÀO LUỒNG RIÊNG
+        
         user.role === 'MODERATOR' ? (
             <ModeratorNavigator />
         ) : (

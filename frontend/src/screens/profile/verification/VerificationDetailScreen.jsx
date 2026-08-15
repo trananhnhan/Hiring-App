@@ -21,7 +21,7 @@ export default function VerificationDetailScreen() {
     const [detail, setDetail] = useState(null);
     const [loading, setLoading] = useState(true);
     
-    // Modals
+    
     const [isConfirmDeleteReq, setIsConfirmDeleteReq] = useState(false);
     const [alertConfig, setAlertConfig] = useState({ visible: false, type: 'info', title: '', message: '' });
 
@@ -48,7 +48,7 @@ export default function VerificationDetailScreen() {
                 visible: true, type: 'success', title: 'Thành công', message: 'Đã hủy yêu cầu xác thực.',
                 onCloseOverride: () => {
                     setAlertConfig(prev => ({ ...prev, visible: false }));
-                    navigation.goBack(); // Quay về List
+                    navigation.goBack(); 
                 }
             });
         } catch (error) {
@@ -77,7 +77,7 @@ export default function VerificationDetailScreen() {
                 <View style={styles.detailCard}>
                     <Text style={styles.detailLabel}>Hình ảnh đính kèm:</Text>
                     
-                    {/* Hiển thị thông báo nếu đang PENDING */}
+                    
                     {isPending && (
                         <Text style={{ fontSize: 13, color: '#6B7280', marginBottom: 12, fontStyle: 'italic' }}>
                             * Yêu cầu đang được xử lý. Nếu cần thay đổi hình ảnh, vui lòng hủy yêu cầu hiện tại và tạo mới.
@@ -88,7 +88,7 @@ export default function VerificationDetailScreen() {
                         <Text style={{ color: '#9CA3AF', fontStyle: 'italic' }}>Không có hình ảnh nào.</Text>
                     ) : (
                         <View style={styles.imageGrid}>
-                            {/* Chỉ render hình để xem, không có nút xóa trên từng hình nữa */}
+                            
                             {detail?.images?.map(img => (
                                 <View key={img.uuid} style={styles.imageBox}>
                                     <Image source={{ uri: img.image }} style={styles.imgPreview} />
@@ -98,7 +98,7 @@ export default function VerificationDetailScreen() {
                     )}
                 </View>
 
-                {/* NÚT HỦY YÊU CẦU: Chỉ hiện khi trạng thái là PENDING */}
+                
                 {isPending && (
                     <AppButton 
                         title="Hủy Yêu Cầu" 

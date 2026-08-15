@@ -23,7 +23,6 @@ export default function ResumeDetailScreen() {
 
     const { resumeUuid } = route.params || {};
 
-    // --- 1. HOOK LẤY DATA (Giữ nguyên) ---
     const {
         data: resumeData,
         loading: detailLoading,
@@ -31,28 +30,23 @@ export default function ResumeDetailScreen() {
         execute: fetchResumeDetail
     } = useApi(resumeServices.getResumeDetail);
 
-    // --- 2. STATE LOCAL CHO NÚT XÓA ---
     const [isDeleting, setIsDeleting] = useState(false);
     const [isConfirmVisible, setIsConfirmVisible] = useState(false);
     const [alertConfig, setAlertConfig] = useState({ visible: false, type: 'info', title: '', message: '' });
 
-    // Tự động load / reload data
     useEffect(() => {
         if (resumeUuid) {
             fetchResumeDetail(resumeUuid);
         }
     }, [resumeUuid, isFocused]);
 
-    // --- 3. HÀM GỌI API XÓA (Trị dứt điểm 204 No Content) ---
     const handleConfirmDelete = async () => {
-        setIsConfirmVisible(false); // Đóng modal hỏi xác nhận
-        setIsDeleting(true); // Bật loading cho nút Xóa
+        setIsConfirmVisible(false); 
+        setIsDeleting(true); 
 
         try {
-            // Gọi API thẳng qua service
             await resumeServices.deleteResume(resumeUuid);
 
-            // Xóa thành công (dù data rỗng) thì bung ngay Popup báo cáo
             setAlertConfig({
                 visible: true,
                 type: 'success',
@@ -60,11 +54,10 @@ export default function ResumeDetailScreen() {
                 message: 'Hồ sơ CV đã được xóa thành công khỏi hệ thống.',
                 onCloseOverride: () => {
                     setAlertConfig(prev => ({ ...prev, visible: false }));
-                    navigation.goBack(); // 🔥 Đóng popup xong là bay về danh sách ngay!
+                    navigation.goBack(); 
                 }
             });
         } catch (err) {
-            // Lỡ có lỗi mạng hoặc API sập
             setAlertConfig({
                 visible: true,
                 type: 'error',
@@ -72,7 +65,7 @@ export default function ResumeDetailScreen() {
                 message: 'Không thể xóa hồ sơ lúc này, vui lòng thử lại sau.'
             });
         } finally {
-            setIsDeleting(false); // Tắt loading
+            setIsDeleting(false); 
         }
     };
 
@@ -87,7 +80,7 @@ export default function ResumeDetailScreen() {
 
     return (
         <View style={[globalStyles.container, { backgroundColor: '#F3F4F6' }]}>
-            {/* HEADER */}
+            
             <View style={[styles.header, { paddingTop: Math.max(insets.top, 24) + 12 }]}>
                 <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn} disabled={isDeleting}>
                     <Ionicons name="arrow-back" size={24} color="#111111" />
@@ -97,7 +90,7 @@ export default function ResumeDetailScreen() {
             </View>
 
             <ScrollView contentContainerStyle={{ paddingBottom: Math.max(insets.bottom, 24) }}>
-                {/* 1. KHỐI ẢNH CV */}
+                
                 {resumeData.resume_img ? (
                     <View style={styles.imageContainer}>
                         <Image
@@ -113,7 +106,6 @@ export default function ResumeDetailScreen() {
                     </View>
                 )}
 
-                {/* 2. KHỐI THÔNG TIN CHÍNH */}
                 <View style={styles.infoCard}>
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                         <Text style={styles.title}>{resumeData.title}</Text>
@@ -133,7 +125,6 @@ export default function ResumeDetailScreen() {
                     <Text style={styles.dateText}>Cập nhật lần cuối: {formatDate(resumeData.updated_date)}</Text>
                 </View>
 
-                {/* 3. KHỐI MÔ TẢ */}
                 {resumeData.description && (
                     <View style={styles.infoCard}>
                         <Text style={styles.sectionTitle}>Giới thiệu bản thân</Text>
@@ -141,7 +132,6 @@ export default function ResumeDetailScreen() {
                     </View>
                 )}
 
-                {/* 4. KHỐI NGÀNH NGHỀ */}
                 <View style={styles.infoCard}>
                     <Text style={styles.sectionTitle}>Lĩnh vực chuyên môn</Text>
                     <View style={styles.tagContainer}>
@@ -158,9 +148,8 @@ export default function ResumeDetailScreen() {
                 </View>
             </ScrollView>
 
-            {/* FOOTER - SỬA BUTTON XÓA MÀU ĐỎ */}
-            <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 16) }]}>
-                {resumeData.is_owner ? (
+            {resumeData.is_owner && (
+                <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 16) }]}>
                     <View style={{ gap: 8 }}>
                         <AppButton
                             title="Chỉnh sửa Hồ sơ"
@@ -168,24 +157,18 @@ export default function ResumeDetailScreen() {
                             onPress={() => navigation.navigate('CreateEditResumeScreen', { resumeUuid: resumeData.uuid })}
                             disabled={isDeleting}
                         />
-                        {/* 🔥 Đã thêm textColor="#EF4444" để ép chữ nút thành đỏ */}
+                        
                         <AppButton
                             title={isDeleting ? "Đang xóa..." : "Xóa Hồ sơ"}
-                            mode="contained" // ✅ Chuyển sang contained để có nền
-                            isDanger={true}  // ✅ Bật chế độ Danger -> Tự động hóa Nền Đỏ, Chữ Trắng
+                            mode="contained" 
+                            isDanger={true}  
                             onPress={() => setIsConfirmVisible(true)}
                             disabled={isDeleting}
                         />
                     </View>
-                ) : (
-                    <AppButton
-                        title="Liên hệ Ứng viên"
-                        mode="contained"
-                    />
-                )}
-            </View>
+                </View>
+            )}
 
-            {/* MODAL 1: XÁC NHẬN */}
             <AppConfirmModal
                 visible={isConfirmVisible}
                 title="Xóa Hồ sơ CV"
@@ -197,7 +180,6 @@ export default function ResumeDetailScreen() {
                 onConfirm={handleConfirmDelete}
             />
 
-            {/* MODAL 2: THÔNG BÁO XONG VIỆC LÀ BAY VỀ */}
             <AppAlertModal
                 visible={alertConfig.visible}
                 type={alertConfig.type}

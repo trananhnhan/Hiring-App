@@ -14,18 +14,18 @@ import { AppInput } from '../../../components/AppInput';
 import { FilterModal } from '../../../components/FilterModal';
 import { TextInput } from 'react-native-paper';
 import JobDetailScreen from '../detail/JobDetailScreen';
-// Component JobCard
+
 const JobCard = ({ item }) => {
   const navigation = useNavigation()
   return (
-    // Dùng globalStyles.card cũ, cần thêm {position: 'relative'} để Badge top-right hoạt động
+    
     <TouchableOpacity 
     style={[globalStyles.card, { position: 'relative' }]} 
     activeOpacity={0.8}
     onPress={() => navigation.navigate('JobDetail', { jobUuid: item.uuid })}
     >
 
-      {/* 1. STATUS BADGE (Top-Right) - Dùng style mới từ globalStyles */}
+      
       {item.status === 'OPEN' && (
         <View style={globalStyles.statusOpenBadgeContainer}>
           <Text style={globalStyles.statusBadgeText}>OPEN</Text>
@@ -42,7 +42,7 @@ const JobCard = ({ item }) => {
         </View>
       )}
 
-      {/* 2. Top Info Group (Logo + Text) - Cần Overwrite InfoWrapper style để tránh đè Badge */}
+      
       <View style={[globalStyles.rowCenter, { alignItems: 'flex-start' }]}>
         <View style={styles.logoWrapper}>
           {item.job_thumbnail ? (
@@ -56,7 +56,7 @@ const JobCard = ({ item }) => {
           )}
         </View>
 
-        {/* Tăng right padding cho text để chừa chỗ cho Badge OPEN lỡ JobTitle dài */}
+        
         <View style={[styles.infoWrapper, { paddingRight: 60 }]}>
           <Text style={styles.companyName} numberOfLines={1}>
             {item.employer_profile?.company_name}
@@ -68,7 +68,7 @@ const JobCard = ({ item }) => {
       </View>
 
 
-      {/* 3. Middle Chips */}
+      
       <View style={globalStyles.chipContainer}>
         <View style={globalStyles.chip}>
           <Text style={globalStyles.chipText}>
@@ -82,8 +82,8 @@ const JobCard = ({ item }) => {
         </View>
       </View>
 
-      {/* 4. FOOTER */}
-      {/* Truyền các props cần thiết từ JSON item */}
+      
+      
       <JobStatFooter
         expiryDate={item.expiry_date}
         slot={item.slot}
@@ -112,7 +112,7 @@ export default function FeedScreen() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
 
-  // Cờ theo dõi lần render đầu tiên
+  
   const isMounted = useRef(false);
 
   const fetchJobs = async (pageNumber = 1, type = 'init', searchKeyword = '', filterParams = {}) => {
@@ -164,7 +164,7 @@ export default function FeedScreen() {
 
 
   useEffect(() => {
-    // 1. Lần đầu vào app -> Gọi API luôn không cần chờ
+    
     if (!isMounted.current) {
       fetchJobs(1, 'init', searchInput, activeFilters);
       isMounted.current = true;
@@ -188,7 +188,7 @@ export default function FeedScreen() {
     }
   };
 
-  // --- UI HEADER ---
+  
   const renderHeader = () => (
     <View style={styles.headerContainer}>
 
@@ -196,14 +196,14 @@ export default function FeedScreen() {
         label="Tìm kiếm công việc..."
         value={searchInput}
         onChangeText={setSearchInput}
-        style={styles.searchInputWrapper} // Truyền style đè marginBottom
+        style={styles.searchInputWrapper} 
         left={<TextInput.Icon icon="magnify" color={COLORS.textSecondary} />}
       />
 
-      {/* Nút Bộ lọc */}
+      
       <TouchableOpacity
         style={styles.filterButton}
-        onPress={() => setIsFilterVisible(true)} // MỞ MODAL
+        onPress={() => setIsFilterVisible(true)} 
       >
         <Text style={styles.filterButtonText}>Bộ lọc</Text>
       </TouchableOpacity>

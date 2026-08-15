@@ -55,7 +55,7 @@ export default function ModeratorListScreen() {
 
     return (
         <View style={[globalStyles.container, { backgroundColor: '#F3F4F6' }]}>
-            {/* HEADER CÓ NÚT ĐĂNG XUẤT */}
+            
             <View style={[styles.header, { paddingTop: Math.max(insets.top, 24) + 12 }]}>
                 <Text style={styles.headerTitle}>Quản lý Yêu cầu (MOD)</Text>
                 <TouchableOpacity onPress={logout} style={{ padding: 4 }}>

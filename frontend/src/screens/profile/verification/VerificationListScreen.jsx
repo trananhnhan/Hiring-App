@@ -21,7 +21,7 @@ export default function VerificationListScreen() {
     const [requests, setRequests] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    // Dùng useFocusEffect để tự reload mỗi khi quay lại từ màn Tạo mới hoặc Chi tiết
+    
     useFocusEffect(
         useCallback(() => {
             if (hasRequiredInfo) {
@@ -35,7 +35,7 @@ export default function VerificationListScreen() {
         }, [hasRequiredInfo])
     );
 
-    // Logic: Nếu có 1 request đang PENDING hoặc ACCEPTED thì chặn tạo mới
+    
     const canCreateNew = !requests.some(r => r.status === 'PENDING' || r.status === 'ACCEPTED');
 
     const getStatusStyle = (status) => {

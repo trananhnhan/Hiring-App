@@ -23,7 +23,7 @@ export const AppMultiSelect = ({
             inputSearchStyle={styles.inputSearchStyle}
             containerStyle={styles.containerStyle}
             
-            // Style riêng biệt của thẻ MultiSelect khi chọn xong
+   
             selectedStyle={styles.selectedStyle}
             
             data={data}
@@ -44,7 +44,7 @@ export const AppMultiSelect = ({
 
 const styles = StyleSheet.create({
     dropdown: {
-        minHeight: 50, // Dùng minHeight thay vì height cố định để tự động giãn dòng khi chọn nhiều
+        minHeight: 50, 
         backgroundColor: COLORS.background,
         borderColor: COLORS.border,
         borderWidth: 1,
@@ -73,10 +73,10 @@ const styles = StyleSheet.create({
         borderRadius: RADIUS.md,
         overflow: 'hidden',
     },
-    // Giao diện cho các tag (chip) khi người dùng chọn nhiều mục
+
     selectedStyle: {
         borderRadius: 12,
-        backgroundColor: '#EFF6FF', // Màu nền xanh nhạt cho item được chọn
+        backgroundColor: '#EFF6FF',
         borderWidth: 1,
         borderColor: '#BFDBFE',
         marginTop: 8,

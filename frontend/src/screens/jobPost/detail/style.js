@@ -4,13 +4,13 @@ import { COLORS, SPACING, RADIUS, FONTSIZE, FONTWEIGHT } from '../../../constant
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // Màu nền lấy từ theme của bạn, dùng globalStyles.container ở file JSX
+    
   },
   scrollContent: {
-    paddingBottom: 120, // Chừa khoảng trống dưới đáy để không bị thanh Bottom Bar che
+    paddingBottom: 120, 
   },
   
-  // Khối 1: Banner ảnh
+  
   bannerContainer: {
     position: 'relative',
     width: '100%',
@@ -23,21 +23,21 @@ export const styles = StyleSheet.create({
     resizeMode: 'cover',
   },
   
-  // --- ✅ CHỖ SỬA 1: Sửa lại vị trí Back Button để không bị đè notch ---
+  
   backButton: {
     position: 'absolute',
-    top: SPACING.md || 16, // Đặt top theo SPACING tiêu chuẩn (ví dụ 16)
+    top: SPACING.md || 16, 
     left: SPACING.md || 16,
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)', // Nền đen mờ 
+    backgroundColor: 'rgba(0, 0, 0, 0.4)', 
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 10,
   },
 
-  // Khối 2: Thông tin tiêu đề chính
+  
   headerContent: {
     padding: SPACING.lg || 20,
     backgroundColor: COLORS.background || '#FFFFFF',
@@ -46,7 +46,7 @@ export const styles = StyleSheet.create({
   },
   titleContainer: {
     position: 'relative',
-    paddingRight: 100, // Chừa khoảng trống bên phải cho Badge trạng thái
+    paddingRight: 100, 
     marginBottom: SPACING.sm || 10,
   },
   jobTitle: {
@@ -62,7 +62,7 @@ export const styles = StyleSheet.create({
     marginTop: SPACING.xs || 6,
   },
 
-  // Khối chung: Tiêu đề các Section phân đoạn
+  
   sectionContainer: {
     padding: SPACING.lg || 20,
     borderBottomWidth: 1,
@@ -76,7 +76,7 @@ export const styles = StyleSheet.create({
     marginBottom: SPACING.md || 12,
   },
 
-  // Khối: Địa chỉ tách biệt 2 hàng
+  
   addressRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
@@ -96,7 +96,7 @@ export const styles = StyleSheet.create({
     lineHeight: 20,
   },
 
-  // Khối 4: Lưới thông số 4 ô (Grid 2x2)
+  
   gridContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -126,7 +126,7 @@ export const styles = StyleSheet.create({
     color: COLORS.textPrimary || '#111111',
   },
 
-  // Khối 5: Lịch làm việc 2 hàng
+  
   scheduleRow: {
     flexDirection: 'row',
     alignItems: 'center', 
@@ -151,16 +151,16 @@ export const styles = StyleSheet.create({
     color: COLORS.textSecondary || '#4B5563',
   },
 
-  // Khối 6: Mô tả công việc
+  
   descriptionText: {
     fontSize: FONTSIZE.md || 14,
     color: COLORS.textPrimary || '#374151',
     lineHeight: 22,
   },
 
-  // Khối 7: Thông tin nhà tuyển dụng đăng bài
   
-  // --- ✅ CHỖ SỬA 2: Đổi sang style cho TouchableOpacity ---
+  
+  
   recruiterCard: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -168,7 +168,7 @@ export const styles = StyleSheet.create({
     borderRadius: RADIUS.md || 12,
     padding: SPACING.md || 16,
     gap: SPACING.md || 12,
-    // Thêm hiệu ứng click nhẹ
+    
     borderColor: COLORS.border || '#E5E7EB',
     borderWidth: 1,
   },
@@ -191,7 +191,7 @@ export const styles = StyleSheet.create({
     marginTop: 2,
   },
 
-  // Khối 8: Thanh dính đáy màn hình (Sticky Bottom Bar)
+  
   bottomStickyBar: {
     position: 'absolute',
     bottom: 0,
@@ -200,7 +200,7 @@ export const styles = StyleSheet.create({
     backgroundColor: COLORS.background || '#FFFFFF',
     paddingHorizontal: SPACING.lg || 20,
     paddingTop: SPACING.md || 14,
-    // ✅ CHỖ SỬA 3: Giảm paddingBottom xuống (vì file JSX sẽ dùng SafeAreaView bao ngoài)
+    
     paddingBottom: 20, 
     borderTopWidth: 1,
     borderColor: COLORS.border || '#E5E7EB',

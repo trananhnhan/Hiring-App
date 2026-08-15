@@ -20,17 +20,17 @@ export default function CreateEditAddressScreen() {
     const insets = useSafeAreaInsets();
     const { setUser } = useContext(AuthContext);
     
-    // Data truyền qua nếu là Edit Mode
+    
     const { addressData } = route.params || {};
     const isEditMode = !!addressData;
 
-    // --- 1. KÉO PROVINCES TỪ GLOBAL CONTEXT ---
+    
     const { provinces } = useGlobalData();
     const provinceOptions = useMemo(() => {
         return (provinces || []).map(p => ({ label: p.name, value: p.id }));
     }, [provinces]);
 
-    // --- 2. STATES ---
+    
     const [provinceId, setProvinceId] = useState(addressData?.province?.id || null);
     const [districtId, setDistrictId] = useState(addressData?.district?.id || null);
     const [wardId, setWardId] = useState(addressData?.ward?.id || null);
@@ -45,7 +45,7 @@ export default function CreateEditAddressScreen() {
     const [isSaving, setIsSaving] = useState(false);
     const [alertConfig, setAlertConfig] = useState({ visible: false, type: 'info', title: '', message: '' });
 
-    // --- 3. FETCH DATA BAN ĐẦU KHI VÀO EDIT MODE ---
+    
     useEffect(() => {
         if (isEditMode) {
             addressService.getDistricts(addressData.province.id)
@@ -55,7 +55,7 @@ export default function CreateEditAddressScreen() {
         }
     }, [isEditMode]);
 
-    // --- 4. XỬ LÝ CHỌN DROPDOWN CASCADING ---
+    
     const handleProvinceChange = async (id) => {
         setProvinceId(id);
         setDistrictId(null); setWardId(null);
@@ -74,7 +74,7 @@ export default function CreateEditAddressScreen() {
         setWardOptions(res.map(w => ({ label: w.name, value: w.id })));
     };
 
-    // --- 5. LƯU DỮ LIỆU ---
+    
     const handleSave = async () => {
         if (!wardId) {
             setAlertConfig({ visible: true, type: 'error', title: 'Cảnh báo', message: 'Vui lòng chọn đầy đủ Tỉnh, Quận, Phường.' });
@@ -91,13 +91,13 @@ export default function CreateEditAddressScreen() {
             };
 
             if (isEditMode) {
-                // Backend báo "gửi field nào sửa field đó" nên chỉ bọc những cái cần thiết
+                
                 await addressService.updateAddress(addressData.uuid, payload);
             } else {
                 await addressService.createAddress(payload);
             }
 
-            // Refresh Context
+            
             const updatedUser = await profileServices.getMe();
             setUser(updatedUser);
 

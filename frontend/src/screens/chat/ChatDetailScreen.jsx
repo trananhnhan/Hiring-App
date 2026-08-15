@@ -33,10 +33,10 @@ export default function ChatDetailScreen() {
         const textToSend = inputText.trim();
         setInputText('');
 
-        // 🌟 SỬA TẠI ĐÂY: Xử lý Tên của người đang cầm máy (currentUser)
+        
         let myDisplayName = currentUser.name || currentUser.username;
 
-        // Nếu mình là Nhà tuyển dụng và có tên công ty trong Context -> Nối nó vào!
+        
         if (currentUser.role === 'EMPLOYER' && currentUser.profile?.company_name) {
             myDisplayName = `${currentUser.name} (${currentUser.profile.company_name})`;
         }
@@ -46,22 +46,22 @@ export default function ChatDetailScreen() {
             text: textToSend,
             user: {
                 _id: currentUser.username,
-                name: myDisplayName // Dùng cái tên đã được nối cho tin nhắn
+                name: myDisplayName 
             }
         }];
 
         try {
-            // Cập nhật lại thông tin của mình để đẩy lên Firebase
+            
             const currentUserInfo = {
                 username: currentUser.username,
-                name: myDisplayName, // Dùng cái tên đã được nối cho thông tin Phòng chat
-                avatar: currentUser.avatar || "https://via.placeholder.com/150"
+                name: myDisplayName, 
+                avatar: currentUser.avatar || 'https://via.placeholder.com/150'
             };
 
             const targetUserInfo = {
                 username: targetUser.username,
                 name: targetUser.name || targetUser.username,
-                avatar: targetUser.avatar || "https://via.placeholder.com/150"
+                avatar: targetUser.avatar || 'https://via.placeholder.com/150'
             };
 
             await chatService.sendMessage(roomId, newMessage, [currentUser.username, targetUser.username], currentUserInfo, targetUserInfo);
@@ -70,15 +70,15 @@ export default function ChatDetailScreen() {
         }
     };
 
-    const renderMessageItem = ({ item }) => {
+const renderMessageItem = ({ item }) => {
         const isMyMessage = item.user._id === currentUser.username;
         return (
             <View style={[styles.messageRow, isMyMessage ? styles.myMessageRow : styles.theirMessageRow]}>
 
-                {/* ✅ ĐÃ THÊM: Nếu là tin nhắn của người kia thì hiện cái Avatar nhỏ nhắn kế bên */}
                 {!isMyMessage && (
                     <Image
-                        source={{ uri: targetUser.avatar || "https://via.placeholder.com/150" }}
+
+                        source={{ uri: targetUser.avatar || 'https://via.placeholder.com/150' }}
                         style={styles.messageAvatar}
                     />
                 )}
@@ -100,7 +100,7 @@ export default function ChatDetailScreen() {
                 </TouchableOpacity>
                 <View style={styles.headerInfo}>
                     <Text style={styles.headerName}>{targetUser?.name || targetUser?.username}</Text>
-                    {/* ❌ ĐÃ XÓA CHỮ "TRỰC TUYẾN" FAKE */}
+                    
                 </View>
                 <View style={{ width: 24 }} />
             </View>
@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
     myMessageRow: { justifyContent: 'flex-end' },
     theirMessageRow: { justifyContent: 'flex-start' },
 
-    // CSS cho Avatar trong tin nhắn
+    
     messageAvatar: { width: 28, height: 28, borderRadius: 14, marginRight: 8, backgroundColor: '#E5E7EB' },
 
     bubble: { maxWidth: '75%', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 20 },

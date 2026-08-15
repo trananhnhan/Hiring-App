@@ -59,7 +59,6 @@ export default function JobDetailScreen() {
     );
   }
 
-  // Ép lịch làm việc xếp đúng thứ tự Thứ 2 -> Chủ Nhật thông qua hàm Utils
   const sortedWorkDays = getSortedWorkDays(job.work_days);
 
   const renderStatusBadge = () => {
@@ -127,9 +126,21 @@ export default function JobDetailScreen() {
       if (job.status === 'OPEN') {
         return (
           <View style={styles.bottomStickyBar}>
-            <TouchableOpacity style={styles.btnChatSmall} onPress={() => navigation.navigate('ChatRoom', { recieverId: job.user?.id })}>
+            <TouchableOpacity 
+              style={styles.btnChatSmall} 
+              onPress={() => navigation.navigate('ChatDetailScreen', {
+                targetUser: {
+                  username: job.user?.username,
+                  name: job.employer_profile?.company_name 
+                    ? `${job.user?.name} (${job.employer_profile.company_name})` 
+                    : job.user?.name || 'Nhà tuyển dụng',
+                  avatar: job.user?.avatar || 'https://via.placeholder.com/150'
+                }
+              })}
+            >
               <Ionicons name="chatbubble-ellipses-outline" size={22} color={COLORS.textPrimary || '#111111'} />
             </TouchableOpacity>
+            
             <TouchableOpacity style={[styles.btnWidth65, { flex: 1 }]} onPress={() => navigation.navigate('ApplyJobScreen', { jobUuid: job.uuid, jobTitle : job.title,companyName : job.employer_profile.company_name })}>
               <Text style={styles.btnTextWhite}>Ứng tuyển ngay 🔥</Text>
             </TouchableOpacity>
@@ -152,10 +163,9 @@ export default function JobDetailScreen() {
       
       <ScrollView contentContainerStyle={[styles.scrollContent, { paddingBottom: 120 }]} showsVerticalScrollIndicator={false}>
         
-        {/* KHỐI 1: BANNER ẢNH TRÀN ĐỈNH */}
         <View style={styles.bannerContainer}>
           <TouchableOpacity 
-            style={[styles.backButton, { top: insets.top -6 }]} 
+            style={[styles.backButton, { top: insets.top - 6 }]} 
             onPress={() => navigation.goBack()}
             activeOpacity={0.7}
           >
@@ -168,7 +178,6 @@ export default function JobDetailScreen() {
           )}
         </View>
 
-        {/* KHỐI 2: TIÊU ĐỀ & CHIIPS */}
         <View style={styles.headerContent}>
           <View style={styles.titleContainer}>
             <Text style={styles.jobTitle}>{job.title}</Text>
@@ -187,7 +196,6 @@ export default function JobDetailScreen() {
           )}
         </View>
 
-        {/* KHỐI 3: ĐỊA CHỈ (ĐÃ REFACTOR QUA HÀM formatArea ĐỂ NỐI CHUỖI ĐỘNG) */}
         <View style={styles.sectionContainer}>
           <Text style={styles.sectionTitle}>Địa điểm làm việc</Text>
           <View style={styles.addressRow}>
@@ -200,7 +208,6 @@ export default function JobDetailScreen() {
           </View>
         </View>
 
-        {/* KHỐI 4: LƯỚI THÔNG SỐ 4 Ô (GRID 2X2) */}
         <View style={styles.sectionContainer}>
           <Text style={styles.sectionTitle}>Thông tin tổng quan</Text>
           <View style={styles.gridContainer}>
@@ -235,7 +242,6 @@ export default function JobDetailScreen() {
           </View>
         </View>
 
-        {/* KHỐI 5: LỊCH LÀM VIỆC (ĐÃ REFACTOR QUA HÀM translateDay VÀ formatTime ĐỘNG) */}
         <View style={styles.sectionContainer}>
           <Text style={styles.sectionTitle}>Thời gian và Lịch làm việc</Text>
           {sortedWorkDays.length > 0 ? (
@@ -257,7 +263,6 @@ export default function JobDetailScreen() {
           )}
         </View>
 
-        {/* KHỐI 6: MÔ TẢ CÔNG VIỆC */}
         <View style={styles.sectionContainer}>
           <Text style={styles.sectionTitle}>Mô tả công việc</Text>
           <Text style={styles.descriptionText} selectable={true}>
@@ -265,7 +270,6 @@ export default function JobDetailScreen() {
           </Text>
         </View>
 
-        {/* KHỐI 7: THÔNG TIN NGƯỜI ĐĂNG BÀI */}
         <View style={styles.sectionContainer}>
           <Text style={styles.sectionTitle}>Người đăng tin tuyển dụng</Text>
           <TouchableOpacity 
@@ -290,7 +294,6 @@ export default function JobDetailScreen() {
 
       </ScrollView>
 
-      {/* KHỐI 8: THANH ĐÁY CỐ ĐỊNH */}
       <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0 }}>
         {renderBottomStickyBar()}
       </View>
